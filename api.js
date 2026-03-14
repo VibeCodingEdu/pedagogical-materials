@@ -1,5 +1,5 @@
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbxvclddcpQYRD0N8bZ3nW1AQzB1qA2QUigKDiQaLKRKn6vsBchRcSVkWKUrSOaH-Hv2/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwDUcOzwL7OYdHH31_h-mnyg6glXK_NixcnREZS5HeUPjPzPKx6efxYW8KbB8SSRePZ/exec';
 
 
 // Admin panel URL — same base URL with ?page=admin
