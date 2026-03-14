@@ -1,21 +1,57 @@
-
+/**
+ * ═══════════════════════════════════════════
+ *  API — JSONP (zero CORS issues)
+ * ═══════════════════════════════════════════
+ */
 const API_URL = 'https://script.google.com/macros/s/AKfycbwDUcOzwL7OYdHH31_h-mnyg6glXK_NixcnREZS5HeUPjPzPKx6efxYW8KbB8SSRePZ/exec';
 
-
-// Admin panel URL — same base URL with ?page=admin
 const ADMIN_URL = API_URL + (API_URL.includes('?') ? '&' : '?') + 'page=admin';
 
-async function apiGet(action, params = {}) {
-  const url = new URL(API_URL);
-  url.searchParams.set('action', action);
-  Object.keys(params).forEach(k => {
-    if (params[k]) url.searchParams.set(k, params[k]);
+/**
+ * JSONP request — creates a <script> tag that loads the response
+ * as JavaScript. Completely bypasses CORS because script tags
+ * are not subject to same-origin policy.
+ */
+var _jsonpCounter = 0;
+
+function apiGet(action, params) {
+  params = params || {};
+  return new Promise(function(resolve, reject) {
+    var cbName = '_jsonp_' + (++_jsonpCounter) + '_' + Date.now();
+    var timeout = setTimeout(function() {
+      cleanup();
+      reject(new Error('Request timeout'));
+    }, 15000);
+
+    // Register global callback
+    window[cbName] = function(data) {
+      cleanup();
+      resolve(data);
+    };
+
+    function cleanup() {
+      clearTimeout(timeout);
+      delete window[cbName];
+      var el = document.getElementById(cbName);
+      if (el) el.remove();
+    }
+
+    // Build URL
+    var url = API_URL + '?action=' + encodeURIComponent(action) + '&callback=' + cbName;
+    Object.keys(params).forEach(function(k) {
+      if (params[k]) url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+    });
+
+    // Create script tag
+    var script = document.createElement('script');
+    script.id = cbName;
+    script.src = url;
+    script.onerror = function() {
+      cleanup();
+      reject(new Error('Network error'));
+    };
+    document.head.appendChild(script);
   });
-  const resp = await fetch(url.toString());
-  const text = await resp.text();
-  if (!text) throw new Error('Empty response');
-  try { return JSON.parse(text); }
-  catch (e) { throw new Error('Invalid response'); }
 }
 
 function openAdmin() {
