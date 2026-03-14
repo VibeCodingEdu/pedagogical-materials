@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&family=Noto+Sans+Hebrew:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #06080D; --bg-secondary: #0D1117; --bg-card: #111820;
+      --bg-card-hover: #161E29; --bg-glass: rgba(17,24,32,0.7); --bg-input: #0D1117;
+      --border-subtle: rgba(255,255,255,0.06); --border-accent: rgba(99,102,241,0.3);
+      --text-primary: #F0F2F5; --text-secondary: #8B95A5; --text-muted: #5A6373;
+      --accent-1: #6366F1; --accent-1-glow: rgba(99,102,241,0.25);
+      --accent-2: #22D3EE; --accent-3: #F472B6; --accent-4: #34D399;
+      --gradient-hero: linear-gradient(135deg, #6366F1 0%, #22D3EE 50%, #34D399 100%);
+      --danger: #EF4444; --warning: #F59E0B; --success: #10B981;
+      --radius-sm: 8px; --radius-md: 14px; --radius-lg: 22px; --radius-xl: 30px;
+      --font-body: 'Rubik', 'Noto Sans Hebrew', sans-serif;
+      --shadow-card: 0 4px 32px rgba(0,0,0,0.3);
+      --shadow-glow: 0 0 40px var(--accent-1-glow);
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--bg-primary); color: var(--text-primary); line-height: 1.7; overflow-x: hidden; min-height: 100vh; }
+
+    .ambient-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+    .ambient-orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.15; }
+    .ambient-orb.orb-1 { width: 600px; height: 600px; background: var(--accent-1); top: -10%; right: -5%; animation: floatOrb 20s ease-in-out infinite; }
+    .ambient-orb.orb-2 { width: 500px; height: 500px; background: var(--accent-2); bottom: 10%; left: -8%; animation: floatOrb 25s ease-in-out infinite reverse; }
+    .ambient-orb.orb-3 { width: 400px; height: 400px; background: var(--accent-3); top: 50%; left: 40%; animation: floatOrb 18s ease-in-out infinite 5s; }
+    @keyframes floatOrb { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-30px) scale(1.1); } }
+    .grain-overlay { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.03; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    .nav { position: fixed; top: 0; right: 0; left: 0; z-index: 100; background: rgba(6,8,13,0.75); backdrop-filter: blur(20px) saturate(180%); border-bottom: 1px solid var(--border-subtle); }
+    .nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 72px; }
+    .nav-logo { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 1.15rem; color: var(--text-primary); text-decoration: none; cursor: pointer; }
+    .nav-logo-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--gradient-hero); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-link { padding: 8px 16px; border-radius: var(--radius-sm); color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: var(--transition); cursor: pointer; border: none; background: none; font-family: var(--font-body); }
+    .nav-link:hover, .nav-link.active { color: var(--text-primary); background: rgba(255,255,255,0.06); }
+    .nav-link.admin-link { color: var(--accent-3); border: 1px solid rgba(244,114,182,0.2); }
+    .nav-link.admin-link:hover { background: rgba(244,114,182,0.1); }
+    .mobile-menu-btn { display: none; background: none; border: none; color: var(--text-primary); font-size: 1.5rem; cursor: pointer; }
+
+    .hero { padding: 160px 24px 100px; text-align: center; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 18px; border-radius: 100px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.2); color: var(--accent-1); font-size: 0.8rem; font-weight: 500; margin-bottom: 28px; animation: fadeInUp 0.8s ease forwards; }
+    .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-4); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .hero h1 { font-size: clamp(2.2rem,5vw,3.8rem); font-weight: 800; line-height: 1.2; margin-bottom: 20px; animation: fadeInUp 0.8s 0.15s ease both; }
+    .hero h1 .gradient-text { background: var(--gradient-hero); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-subtitle { font-size: 1.15rem; color: var(--text-secondary); max-width: 560px; margin: 0 auto 40px; font-weight: 400; line-height: 1.8; animation: fadeInUp 0.8s 0.3s ease both; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+    .search-container { max-width: 620px; margin: 0 auto; animation: fadeInUp 0.8s 0.45s ease both; }
+    .search-box { display: flex; align-items: center; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 6px 6px 6px 20px; transition: var(--transition); box-shadow: var(--shadow-card); }
+    .search-box:focus-within { border-color: var(--accent-1); box-shadow: var(--shadow-glow); }
+    .search-icon { color: var(--text-muted); font-size: 1.15rem; margin-left: 12px; flex-shrink: 0; }
+    .search-input { flex: 1; border: none; background: none; outline: none; font-family: var(--font-body); font-size: 1rem; color: var(--text-primary); padding: 14px 0; direction: rtl; }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-btn { padding: 12px 28px; border: none; border-radius: var(--radius-md); background: var(--gradient-hero); color: white; font-family: var(--font-body); font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: var(--transition); white-space: nowrap; }
+    .search-btn:hover { transform: scale(1.03); box-shadow: var(--shadow-glow); }
+
+    .subjects-section { padding: 20px 24px 60px; }
+    .subjects-grid { max-width: 1280px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+    .subject-pill { display: flex; align-items: center; gap: 10px; padding: 14px 28px; border-radius: var(--radius-lg); background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-primary); font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: var(--transition); }
+    .subject-pill:hover { transform: translateY(-3px); box-shadow: var(--shadow-card); border-color: var(--border-accent); }
+    .subject-pill.active { border-color: var(--accent-1); background: rgba(99,102,241,0.1); }
+    .subject-pill-icon { font-size: 1.3rem; }
+
+    .filter-bar { max-width: 1280px; margin: 0 auto 32px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .filter-bar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .filter-label { color: var(--text-secondary); font-size: 0.85rem; font-weight: 500; }
+    .filter-select { background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-primary); font-family: var(--font-body); padding: 8px 16px; border-radius: var(--radius-sm); font-size: 0.85rem; cursor: pointer; outline: none; direction: rtl; }
+    .results-count { color: var(--text-muted); font-size: 0.85rem; }
+
+    .materials-section { padding: 0 24px 80px; }
+    .materials-grid { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .material-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; transition: var(--transition); display: flex; flex-direction: column; animation: fadeInUp 0.5s ease both; }
+    .material-card:hover { transform: translateY(-4px); border-color: var(--border-accent); box-shadow: var(--shadow-card); }
+    .card-header { padding: 24px 24px 16px; display: flex; align-items: flex-start; justify-content: space-between; }
+    .card-subject-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 14px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
+    .card-file-type { padding: 4px 10px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.06); color: var(--text-muted); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+    .card-body { padding: 0 24px 20px; flex: 1; }
+    .card-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; line-height: 1.5; }
+    .card-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-tags { padding: 0 24px 16px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .card-tag { padding: 3px 10px; border-radius: 100px; background: rgba(255,255,255,0.04); color: var(--text-muted); font-size: 0.72rem; }
+    .card-footer { padding: 16px 24px; border-top: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; }
+    .card-meta { display: flex; align-items: center; gap: 16px; font-size: 0.78rem; color: var(--text-muted); }
+    .card-meta-item { display: flex; align-items: center; gap: 4px; }
+    .card-download-btn { display: flex; align-items: center; gap: 6px; padding: 8px 20px; border-radius: var(--radius-sm); background: var(--accent-1); color: white; border: none; font-family: var(--font-body); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: var(--transition); }
+    .card-download-btn:hover { background: #5558E6; transform: scale(1.04); }
+
+    .empty-state { text-align: center; padding: 80px 24px; max-width: 400px; margin: 0 auto; }
+    .empty-state-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+    .empty-state-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; }
+    .empty-state-text { color: var(--text-secondary); font-size: 0.9rem; }
+
+    .page-content { max-width: 800px; margin: 0 auto; padding: 140px 24px 80px; }
+    .page-content h2 { font-size: 2rem; margin-bottom: 24px; font-weight: 700; }
+    .page-content p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 16px; }
+
+    .footer { border-top: 1px solid var(--border-subtle); padding: 40px 24px; text-align: center; color: var(--text-muted); font-size: 0.82rem; }
+
+    .skeleton { background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; border-radius: var(--radius-sm); }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .skeleton-card { height: 280px; border-radius: var(--radius-lg); }
+
+    /* ══════ ADMIN STYLES ══════ */
+    .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; position: fixed; inset: 0; z-index: 500; background: var(--bg-primary); }
+    .login-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 48px 40px; width: 100%; max-width: 420px; text-align: center; box-shadow: var(--shadow-card); }
+    .login-icon { width: 64px; height: 64px; border-radius: var(--radius-md); background: var(--gradient-hero); margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+    .login-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+    .login-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 32px; }
+
+    .form-group { margin-bottom: 20px; text-align: right; }
+    .form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+    .form-input, .form-select, .form-textarea { width: 100%; padding: 12px 16px; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-primary); font-family: var(--font-body); font-size: 0.95rem; outline: none; transition: var(--transition); direction: rtl; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent-1); box-shadow: 0 0 0 3px var(--accent-1-glow); }
+    .form-textarea { min-height: 120px; resize: vertical; }
+    .form-error { color: var(--danger); font-size: 0.8rem; margin-top: 4px; display: none; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border: none; border-radius: var(--radius-sm); font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: var(--transition); white-space: nowrap; }
+    .btn-primary { background: var(--accent-1); color: white; }
+    .btn-primary:hover { background: #5558E6; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #DC2626; }
+    .btn-ghost { background: rgba(255,255,255,0.06); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+    .btn-sm { padding: 8px 14px; font-size: 0.8rem; }
+    .btn-full { width: 100%; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .admin-wrapper { position: fixed; inset: 0; z-index: 400; background: var(--bg-primary); display: none; }
+    .admin-wrapper.open { display: flex; }
+    .admin-layout { display: flex; width: 100%; height: 100%; }
+
+    .sidebar { width: 260px; background: var(--bg-secondary); border-left: 1px solid var(--border-subtle); padding: 24px 16px; display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 8px 12px; margin-bottom: 32px; font-weight: 700; font-size: 1rem; }
+    .sidebar-logo-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--gradient-hero); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .sidebar-nav { flex: 1; }
+    .sidebar-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: var(--transition); margin-bottom: 4px; border: none; background: none; width: 100%; text-align: right; font-family: var(--font-body); }
+    .sidebar-nav-item:hover { background: rgba(255,255,255,0.06); color: var(--text-primary); }
+    .sidebar-nav-item.active { background: rgba(99,102,241,0.12); color: var(--accent-1); }
+    .sidebar-nav-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+    .sidebar-footer { padding-top: 16px; border-top: 1px solid var(--border-subtle); }
+
+    .admin-main { flex: 1; padding: 32px; overflow-y: auto; }
+
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 12px; }
+    .section-title { font-size: 1.4rem; font-weight: 700; }
+    .section-subtitle { color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; }
+    .stat-card-icon { font-size: 1.5rem; margin-bottom: 12px; }
+    .stat-card-value { font-size: 2rem; font-weight: 800; line-height: 1; }
+    .stat-card-label { color: var(--text-secondary); font-size: 0.82rem; margin-top: 6px; }
+
+    .data-table-container { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); overflow: hidden; }
+    .data-table { width: 100%; border-collapse: collapse; text-align: right; }
+    .data-table th { padding: 14px 16px; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-subtle); background: var(--bg-secondary); }
+    .data-table td { padding: 14px 16px; font-size: 0.88rem; border-bottom: 1px solid var(--border-subtle); }
+    .data-table tr:hover td { background: var(--bg-card-hover); }
+    .data-table .actions { display: flex; gap: 6px; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 0.72rem; font-weight: 600; }
+    .badge-success { background: rgba(16,185,129,0.15); color: var(--success); }
+    .badge-danger { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); z-index: 600; display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; visibility: hidden; transition: var(--transition); }
+    .modal-overlay.open { opacity: 1; visibility: visible; }
+    .modal { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; transform: translateY(20px); transition: var(--transition); }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .modal-title { font-size: 1.2rem; font-weight: 700; }
+    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+
+    .file-upload-area { border: 2px dashed var(--border-subtle); border-radius: var(--radius-md); padding: 32px; text-align: center; cursor: pointer; transition: var(--transition); }
+    .file-upload-area:hover { border-color: var(--accent-1); }
+    .file-upload-area.has-file { border-color: var(--success); background: rgba(16,185,129,0.05); }
+    .file-upload-icon { font-size: 2rem; margin-bottom: 8px; }
+    .file-upload-text { color: var(--text-secondary); font-size: 0.85rem; }
+    .file-upload-name { color: var(--accent-4); font-weight: 600; font-size: 0.9rem; margin-top: 8px; }
+
+    .toast { position: fixed; bottom: 24px; left: 24px; z-index: 700; padding: 14px 24px; border-radius: var(--radius-md); font-size: 0.9rem; font-weight: 500; transform: translateY(100px); opacity: 0; transition: var(--transition); }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-success { background: var(--success); color: white; }
+    .toast-error { background: var(--danger); color: white; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: block; }
+      .nav-links.open { display: flex; flex-direction: column; position: absolute; top: 72px; right: 0; left: 0; background: var(--bg-secondary); padding: 16px; border-bottom: 1px solid var(--border-subtle); }
+      .hero { padding: 130px 16px 60px; }
+      .materials-grid { grid-template-columns: 1fr; }
+      .filter-bar { flex-direction: column; align-items: flex-start; }
+      .sidebar { display: none; }
+      .admin-main { padding: 16px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .data-table-container { overflow-x: auto; }
+    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--bg-card-hover); border-radius: 100px; }
+  </style>
+</head>
+<body>
+  <div class="ambient-bg"><div class="ambient-orb orb-1"></div><div class="ambient-orb orb-2"></div><div class="ambient-orb orb-3"></div></div>
+  <div class="grain-overlay"></div>
+
+  <!-- PUBLIC SITE -->
+  <div id="publicSite">
+    <nav class="nav"><div class="nav-inner">
+      <a class="nav-logo" onclick="navigateTo('home')"><div class="nav-logo-icon">📚</div><span id="navTitle">מרכז החומרים</span></a>
+      <div class="nav-links" id="navLinks">
+        <button class="nav-link active" onclick="navigateTo('home')">דף הבית</button>
+        <div id="navSubjects" style="display:contents;"></div>
+        <div id="navPages" style="display:contents;"></div>
+        <button class="nav-link admin-link" onclick="showAdminLogin()">🔐 ניהול</button>
+      </div>
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+    </div></nav>
+
+    <main id="mainContent">
+      <div id="homeView">
+        <section class="hero">
+          <div class="hero-badge"><span class="hero-badge-dot"></span><span>חומרים חדשים מתעדכנים באופן שוטף</span></div>
+          <h1><span class="gradient-text" id="heroTitle">מרכז החומרים הפדגוגיים</span></h1>
+          <p class="hero-subtitle" id="heroSubtitle">חומרי לימוד איכותיים למורים בבית הספר היסודי — מצגות, דפי עבודה וחומרים פדגוגיים מוכנים להורדה</p>
+          <div class="search-container"><div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchInput" placeholder="חיפוש חומרים לפי נושא, כיתה או מילת מפתח..." oninput="debounceSearch()">
+            <button class="search-btn" onclick="performSearch()">חיפוש</button>
+          </div></div>
+        </section>
+        <section class="subjects-section"><div class="subjects-grid" id="subjectsGrid"></div></section>
+        <div class="filter-bar" id="filterBar" style="display:none;">
+          <div class="filter-bar-right"><span class="filter-label">סינון לפי כיתה:</span>
+            <select class="filter-select" id="gradeFilter" onchange="applyFilters()">
+              <option value="">כל הכיתות</option><option value="א">כיתה א׳</option><option value="ב">כיתה ב׳</option><option value="ג">כיתה ג׳</option><option value="ד">כיתה ד׳</option><option value="ה">כיתה ה׳</option><option value="ו">כיתה ו׳</option><option value="ז">כיתה ז׳</option><option value="ח">כיתה ח׳</option>
+            </select></div>
+          <span class="results-count" id="resultsCount"></span>
+        </div>
+        <section class="materials-section"><div class="materials-grid" id="materialsGrid"></div></section>
+      </div>
+      <div id="pageView" style="display:none;"><div class="page-content" id="pageContent"></div></div>
+    </main>
+    <footer class="footer"><p id="footerText">© 2026 מרכז החומרים הפדגוגיים. כל הזכויות שמורות.</p></footer>
+  </div>
+
+  <!-- ADMIN LOGIN -->
+  <div id="adminLoginScreen" class="login-screen" style="display:none;">
+    <div class="login-card">
+      <div class="login-icon">🔐</div>
+      <div class="login-title">כניסה לניהול</div>
+      <div class="login-subtitle">הזינו את סיסמת המנהל כדי להמשיך</div>
+      <div id="loginNote" style="color:var(--accent-2);font-size:0.82rem;margin-bottom:16px;display:none;">כניסה ראשונה — הסיסמה שתזינו תהפוך לסיסמת המנהל</div>
+      <div class="form-group"><input type="password" class="form-input" id="loginPassword" placeholder="סיסמת מנהל" onkeypress="if(event.key==='Enter')doLogin()"></div>
+      <div id="loginError" class="form-error" style="text-align:center;margin-bottom:12px;"></div>
+      <button class="btn btn-primary btn-full" id="loginBtn" onclick="doLogin()">🔑 התחברות</button>
+      <button class="btn btn-ghost btn-full" style="margin-top:10px;" onclick="hideAdminLogin()">← חזרה לאתר</button>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminWrapper" class="admin-wrapper"><div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><div class="sidebar-logo-icon">📚</div><span>ניהול האתר</span></div>
+      <nav class="sidebar-nav" id="adminSidebarNav">
+        <button class="sidebar-nav-item active" onclick="showAdminSection('dashboard',this)"><span class="sidebar-nav-icon">📊</span> לוח בקרה</button>
+        <button class="sidebar-nav-item" onclick="showAdminSection('materials',this)"><span class="sidebar-nav-icon">📄</span> חומרים</button>
+        <button class="sidebar-nav-item" onclick="showAdminSection('subjects',this)"><span class="sidebar-nav-icon">📚</span> מקצועות</button>
+        <button class="sidebar-nav-item" onclick="showAdminSection('pages',this)"><span class="sidebar-nav-icon">📝</span> דפים</button>
+        <button class="sidebar-nav-item" onclick="showAdminSection('settings',this)"><span class="sidebar-nav-icon">⚙️</span> הגדרות</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="sidebar-nav-item" onclick="exitAdmin()"><span class="sidebar-nav-icon">🌐</span> חזרה לאתר</button>
+        <button class="sidebar-nav-item" style="color:var(--danger);" onclick="doLogout()"><span class="sidebar-nav-icon">🚪</span> התנתקות</button>
+      </div>
+    </aside>
+    <main class="admin-main">
+      <section id="adm-dashboard">
+        <div class="section-header"><div><div class="section-title">לוח בקרה</div><div class="section-subtitle">סקירה כללית של האתר</div></div></div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-card-icon">📄</div><div class="stat-card-value" id="statMaterials">—</div><div class="stat-card-label">חומרים</div></div>
+          <div class="stat-card"><div class="stat-card-icon">📚</div><div class="stat-card-value" id="statSubjects">—</div><div class="stat-card-label">מקצועות</div></div>
+          <div class="stat-card"><div class="stat-card-icon">📝</div><div class="stat-card-value" id="statPages">—</div><div class="stat-card-label">דפים</div></div>
+          <div class="stat-card"><div class="stat-card-icon">⬇️</div><div class="stat-card-value" id="statDownloads">—</div><div class="stat-card-label">הורדות</div></div>
+        </div>
+        <div class="section-header"><div class="section-title" style="font-size:1.1rem;">חומרים אחרונים</div></div>
+        <div class="data-table-container"><table class="data-table"><thead><tr><th>כותרת</th><th>מקצוע</th><th>כיתה</th><th>תאריך</th></tr></thead><tbody id="recentMaterialsBody"><tr><td colspan="4" style="text-align:center;color:var(--text-muted);">טוען...</td></tr></tbody></table></div>
+      </section>
+      <section id="adm-materials" style="display:none;">
+        <div class="section-header"><div><div class="section-title">ניהול חומרים</div><div class="section-subtitle">הוספה, עריכה ומחיקה של חומרי לימוד</div></div><button class="btn btn-primary" onclick="openMaterialModal()">➕ הוספת חומר</button></div>
+        <div class="data-table-container"><table class="data-table"><thead><tr><th>כותרת</th><th>מקצוע</th><th>כיתה</th><th>קובץ</th><th>הורדות</th><th>סטטוס</th><th>פעולות</th></tr></thead><tbody id="materialsTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">טוען...</td></tr></tbody></table></div>
+      </section>
+      <section id="adm-subjects" style="display:none;">
+        <div class="section-header"><div><div class="section-title">ניהול מקצועות</div></div><button class="btn btn-primary" onclick="openSubjectModal()">➕ הוספת מקצוע</button></div>
+        <div class="data-table-container"><table class="data-table"><thead><tr><th>אייקון</th><th>שם</th><th>צבע</th><th>סדר</th><th>סטטוס</th><th>פעולות</th></tr></thead><tbody id="subjectsTableBody"><tr><td colspan="6" style="text-align:center;color:var(--text-muted);">טוען...</td></tr></tbody></table></div>
+      </section>
+      <section id="adm-pages" style="display:none;">
+        <div class="section-header"><div><div class="section-title">ניהול דפים</div></div><button class="btn btn-primary" onclick="openPageModal()">➕ הוספת דף</button></div>
+        <div class="data-table-container"><table class="data-table"><thead><tr><th>כותרת</th><th>Slug</th><th>סטטוס</th><th>עודכן</th><th>פעולות</th></tr></thead><tbody id="pagesTableBody"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);">טוען...</td></tr></tbody></table></div>
+      </section>
+      <section id="adm-settings" style="display:none;">
+        <div class="section-header"><div><div class="section-title">הגדרות האתר</div></div></div>
+        <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:32px;max-width:640px;">
+          <div class="form-group"><label class="form-label">כותרת האתר</label><input type="text" class="form-input" id="setSiteTitle"></div>
+          <div class="form-group"><label class="form-label">כותרת משנה (Hero)</label><input type="text" class="form-input" id="setHeroSubtitle"></div>
+          <div class="form-group"><label class="form-label">טקסט Footer</label><input type="text" class="form-input" id="setFooterText"></div>
+          <hr style="border-color:var(--border-subtle);margin:24px 0;">
+          <div class="section-title" style="font-size:1rem;margin-bottom:16px;">שינוי סיסמה</div>
+          <div class="form-group"><label class="form-label">סיסמה נוכחית</label><input type="password" class="form-input" id="setOldPassword"></div>
+          <div class="form-group"><label class="form-label">סיסמה חדשה</label><input type="password" class="form-input" id="setNewPassword"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="saveSettings()">💾 שמירת הגדרות</button><button class="btn btn-ghost" onclick="changePassword()">🔑 שינוי סיסמה</button></div>
+        </div>
+      </section>
+    </main>
+  </div></div>
+
+  <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalContent"></div></div>
+  <div class="toast" id="toast"></div>
+
+
+  <script src="api.js"></script>
+  <script>
+    let state = { subjects:[], materials:[], settings:{}, pages:[], currentSubject:null, currentSearch:'', currentGrade:'', searchTimeout:null };
+    let adminState = { token:null, materials:[], subjects:[], pages:[], settings:{} };
+
+    // ══════ PUBLIC ══════
+    async function init() {
+      showLoadingGrid();
+      try {
+        var [subjResp, setResp] = await Promise.all([apiGet('getSubjects'), apiGet('getSettings')]);
+        state.subjects = subjResp.data || []; state.settings = setResp.data || {};
+        applySettings(); renderSubjects(); await loadMaterials();
+      } catch(e) { console.error('Init error:', e); }
+    }
+
+    function applySettings() {
+      var s = state.settings;
+      if (s.siteTitle) { document.getElementById('heroTitle').textContent = s.siteTitle; document.getElementById('navTitle').textContent = s.siteTitle; }
+      if (s.heroSubtitle) document.getElementById('heroSubtitle').textContent = s.heroSubtitle;
+      if (s.footerText) document.getElementById('footerText').textContent = s.footerText;
+    }
+
+    function renderSubjects() {
+      var grid = document.getElementById('subjectsGrid');
+      var navSubjects = document.getElementById('navSubjects');
+      grid.innerHTML = '<div class="subject-pill '+ (!state.currentSubject?'active':'') +'" onclick="filterBySubject(null)"><span class="subject-pill-icon">📋</span><span>הכל</span></div>' +
+        state.subjects.map(function(s){return '<div class="subject-pill '+(state.currentSubject===s.name?'active':'')+'" onclick="filterBySubject(\''+s.name+'\')" style="'+(state.currentSubject===s.name?'border-color:'+s.color+';background:'+s.color+'15;':'')+'"><span class="subject-pill-icon">'+s.icon+'</span><span>'+s.name+'</span></div>';}).join('');
+      navSubjects.innerHTML = state.subjects.map(function(s){return '<button class="nav-link" onclick="filterBySubject(\''+s.name+'\')">'+s.icon+' '+s.name+'</button>';}).join('');
+    }
+
+    function filterBySubject(name) { state.currentSubject = name; renderSubjects(); loadMaterials(); }
+
+    async function loadMaterials() {
+      showLoadingGrid();
+      var params = {};
+      if (state.currentSubject) params.subject = state.currentSubject;
+      if (state.currentSearch) params.search = state.currentSearch;
+      if (state.currentGrade) params.gradeLevel = state.currentGrade;
+      try { var resp = await apiGet('getMaterials', params); state.materials = resp.data || []; renderMaterials(); }
+      catch(e) { state.materials = []; renderMaterials(); }
+    }
+
+    function renderMaterials() {
+      var grid = document.getElementById('materialsGrid');
+      var filterBar = document.getElementById('filterBar');
+      var countEl = document.getElementById('resultsCount');
+      if (state.materials.length === 0 && !state.currentSearch && !state.currentSubject) {
+        filterBar.style.display = 'none';
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">📭</div><div class="empty-state-title">אין חומרים עדיין</div><div class="empty-state-text">חומרים חדשים יתווספו בקרוב!</div></div>';
+        return;
+      }
+      filterBar.style.display = 'flex';
+      countEl.textContent = state.materials.length + ' חומרים נמצאו';
+      if (state.materials.length === 0) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">🔍</div><div class="empty-state-title">לא נמצאו תוצאות</div><div class="empty-state-text">נסו לשנות את מילות החיפוש</div></div>';
+        return;
+      }
+      grid.innerHTML = state.materials.map(function(m,i) {
+        var subject = state.subjects.find(function(s){return s.name===m.subject;});
+        var sc = subject ? subject.color : '#6366F1';
+        var si = subject ? subject.icon : '📄';
+        var ext = getFileExtension(m.fileName || m.fileType);
+        var size = formatFileSize(m.fileSize);
+        var tags = m.tags ? m.tags.split(',').map(function(t){return t.trim();}).filter(Boolean) : [];
+        return '<div class="material-card" style="animation-delay:'+i*0.05+'s;"><div class="card-header"><div class="card-subject-badge" style="background:'+sc+'15;color:'+sc+';">'+si+' '+(m.subject||'כללי')+'</div><div class="card-file-type">'+ext+'</div></div><div class="card-body"><div class="card-title">'+esc(m.title)+'</div>'+(m.description?'<div class="card-desc">'+esc(m.description)+'</div>':'')+'</div>'+(tags.length?'<div class="card-tags">'+tags.slice(0,4).map(function(t){return '<span class="card-tag">'+esc(t)+'</span>';}).join('')+'</div>':'')+'<div class="card-footer"><div class="card-meta">'+(m.gradeLevel?'<span class="card-meta-item">🎓 כיתה '+m.gradeLevel+'</span>':'')+(size?'<span class="card-meta-item">📦 '+size+'</span>':'')+'<span class="card-meta-item">⬇️ '+(m.downloadCount||0)+'</span></div><button class="card-download-btn" onclick="downloadMaterial(\''+m.id+'\',this)">⬇ הורדה</button></div></div>';
+      }).join('');
+    }
+
+    function showLoadingGrid() { document.getElementById('materialsGrid').innerHTML = Array(6).fill(0).map(function(){return '<div class="skeleton skeleton-card"></div>';}).join(''); }
+
+    async function downloadMaterial(id, btn) {
+      btn.textContent = '⏳ טוען...'; btn.disabled = true;
+      try { var resp = await apiGet('getDownloadUrl', {id: id}); if(resp.data) window.open(resp.data,'_blank'); else alert('שגיאה'); }
+      catch(e) { alert('שגיאה'); }
+      btn.textContent = '⬇ הורדה'; btn.disabled = false;
+    }
+
+    function debounceSearch() { clearTimeout(state.searchTimeout); state.searchTimeout = setTimeout(performSearch, 400); }
+    function performSearch() { state.currentSearch = document.getElementById('searchInput').value.trim(); loadMaterials(); }
+    function applyFilters() { state.currentGrade = document.getElementById('gradeFilter').value; loadMaterials(); }
+
+    function navigateTo(target) {
+      document.getElementById('homeView').style.display = target==='home' ? 'block' : 'none';
+      document.getElementById('pageView').style.display = target!=='home' ? 'block' : 'none';
+      closeMobileMenu();
+      if (target==='home') { state.currentSubject=null; state.currentSearch=''; document.getElementById('searchInput').value=''; renderSubjects(); loadMaterials(); }
+    }
+    async function navigateToPage(slug) {
+      navigateTo('page');
+      try { var resp = await apiGet('getPage', {slug: slug});
+        var page = resp.data;
+        document.getElementById('pageContent').innerHTML = page ? '<h2>'+esc(page.title)+'</h2><div>'+page.content+'</div>' : '<div class="empty-state"><div class="empty-state-icon">😕</div><div class="empty-state-title">הדף לא נמצא</div></div>';
+      } catch(e) {}
+    }
+    function toggleMobileMenu() { document.getElementById('navLinks').classList.toggle('open'); }
+    function closeMobileMenu() { document.getElementById('navLinks').classList.remove('open'); }
+
+    // ══════ ADMIN AUTH ══════
+    async function showAdminLogin() {
+      closeMobileMenu();
+      document.getElementById('adminLoginScreen').style.display = 'flex';
+      document.getElementById('loginPassword').focus();
+      try { var resp = await apiGet('getSettings'); var s = resp.data||{}; document.getElementById('loginNote').style.display = s.adminPasswordHash ? 'none' : 'block'; } catch(e) {}
+    }
+    function hideAdminLogin() { document.getElementById('adminLoginScreen').style.display='none'; document.getElementById('loginPassword').value=''; }
+
+    async function doLogin() {
+      var pw = document.getElementById('loginPassword').value; if(!pw) return;
+      var btn = document.getElementById('loginBtn'); btn.disabled=true; btn.textContent='⏳ מתחבר...';
+      try {
+        var result = await apiPost('adminLogin', {password: pw});
+        if (result.success) { adminState.token=result.token; document.getElementById('adminLoginScreen').style.display='none'; document.getElementById('adminWrapper').classList.add('open'); loadAdminDashboard(); }
+        else { var el=document.getElementById('loginError'); el.textContent=result.error||'שגיאה'; el.style.display='block'; setTimeout(function(){el.style.display='none';},4000); }
+      } catch(e) { var el=document.getElementById('loginError'); el.textContent='שגיאה בשרת'; el.style.display='block'; }
+      btn.disabled=false; btn.textContent='🔑 התחברות';
+    }
+
+    function exitAdmin() { document.getElementById('adminWrapper').classList.remove('open'); init(); }
+    async function doLogout() {
+      if(adminState.token) { try{await apiPost('adminLogout',{token:adminState.token});}catch(e){} }
+      adminState.token=null; document.getElementById('adminWrapper').classList.remove('open'); document.getElementById('loginPassword').value=''; init();
+    }
+
+    // ══════ ADMIN SECTIONS ══════
+    function showAdminSection(name, btnEl) {
+      document.querySelectorAll('[id^="adm-"]').forEach(function(el){el.style.display='none';});
+      document.getElementById('adm-'+name).style.display='block';
+      document.querySelectorAll('#adminSidebarNav .sidebar-nav-item').forEach(function(el){el.classList.remove('active');});
+      if(btnEl) btnEl.classList.add('active');
+      switch(name) {
+        case 'dashboard': loadAdminDashboard(); break;
+        case 'materials': loadAdminMaterials(); break;
+        case 'subjects': loadAdminSubjects(); break;
+        case 'pages': loadAdminPages(); break;
+        case 'settings': loadAdminSettings(); break;
+      }
+    }
+
+    async function loadAdminDashboard() {
+      try {
+        var resp = await apiPost('adminGetStats',{token:adminState.token});
+        if(resp.error==='unauthorized'){doLogout();return;}
+        var stats = resp.data;
+        document.getElementById('statMaterials').textContent=stats.totalMaterials;
+        document.getElementById('statSubjects').textContent=stats.totalSubjects;
+        document.getElementById('statPages').textContent=stats.totalPages;
+        document.getElementById('statDownloads').textContent=stats.totalDownloads;
+        var tbody=document.getElementById('recentMaterialsBody');
+        tbody.innerHTML = (stats.recentMaterials&&stats.recentMaterials.length) ? stats.recentMaterials.map(function(m){return '<tr><td>'+esc(m.title)+'</td><td>'+esc(m.subject)+'</td><td>'+(m.gradeLevel||'—')+'</td><td>'+formatDate(m.createdAt)+'</td></tr>';}).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">אין חומרים</td></tr>';
+      } catch(e){}
+    }
+
+    // ══════ ADMIN MATERIALS ══════
+    async function loadAdminMaterials() {
+      try {
+        var sResp = await apiPost('adminGetSubjects',{token:adminState.token});
+        adminState.subjects = sResp.data || [];
+        var mResp = await apiPost('adminGetAllMaterials',{token:adminState.token});
+        if(mResp.error==='unauthorized'){doLogout();return;}
+        adminState.materials = mResp.data || [];
+        var tbody=document.getElementById('materialsTableBody');
+        if(!adminState.materials.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">אין חומרים</td></tr>';return;}
+        tbody.innerHTML = adminState.materials.map(function(m){return '<tr><td><strong>'+esc(m.title)+'</strong></td><td>'+esc(m.subject)+'</td><td>'+(m.gradeLevel||'—')+'</td><td style="font-size:0.8rem;color:var(--text-muted);">'+esc(m.fileName||'—')+'</td><td>'+(m.downloadCount||0)+'</td><td>'+(m.isActive!==false&&m.isActive!=='FALSE'?'<span class="badge badge-success">פעיל</span>':'<span class="badge badge-danger">מושבת</span>')+'</td><td class="actions"><button class="btn btn-ghost btn-sm" onclick="openMaterialModal(\''+m.id+'\')">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteMaterial(\''+m.id+'\')">🗑️</button></td></tr>';}).join('');
+      } catch(e){}
+    }
+
+    var selectedFile = null;
+    function openMaterialModal(editId) {
+      var mat = editId ? adminState.materials.find(function(m){return m.id===editId;}) : null;
+      var opts = (adminState.subjects||[]).map(function(s){return '<option value="'+esc(s.name)+'" '+(mat&&mat.subject===s.name?'selected':'')+'>'+esc(s.name)+'</option>';}).join('');
+      var grades = ['א','ב','ג','ד','ה','ו','ז','ח'].map(function(g){return '<option value="'+g+'" '+(mat&&mat.gradeLevel===g?'selected':'')+'>כיתה '+g+'׳</option>';}).join('');
+      document.getElementById('modalContent').innerHTML =
+        '<div class="modal-header"><div class="modal-title">'+(mat?'עריכת חומר':'הוספת חומר חדש')+'</div><button class="modal-close" onclick="closeModal()">✕</button></div>'+
+        '<div class="form-group"><label class="form-label">כותרת *</label><input type="text" class="form-input" id="matTitle" value="'+(mat?esc(mat.title):'')+'"></div>'+
+        '<div class="form-group"><label class="form-label">תיאור</label><textarea class="form-textarea" id="matDesc">'+(mat?esc(mat.description):'')+'</textarea></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;"><div class="form-group"><label class="form-label">מקצוע *</label><select class="form-select" id="matSubject">'+opts+'</select></div><div class="form-group"><label class="form-label">כיתה</label><select class="form-select" id="matGrade"><option value="">—</option>'+grades+'</select></div></div>'+
+        '<div class="form-group"><label class="form-label">תגיות (בפסיקים)</label><input type="text" class="form-input" id="matTags" value="'+(mat?esc(mat.tags):'')+'"></div>'+
+        (!mat?'<div class="form-group"><label class="form-label">קובץ *</label><div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById(\'fileInput\').click()"><div class="file-upload-icon">📎</div><div class="file-upload-text">לחצו להעלאת קובץ</div><div class="file-upload-name" id="fileUploadName"></div></div><input type="file" id="fileInput" style="display:none" onchange="handleFileSelect(this)"></div>':'')+
+        '<div class="modal-actions"><button class="btn btn-primary" onclick="'+(mat?"saveMaterialEdit('"+mat.id+"')":"saveMaterial()")+'" id="modalSaveBtn">💾 '+(mat?'שמירה':'הוספה')+'</button><button class="btn btn-ghost" onclick="closeModal()">ביטול</button></div>';
+      selectedFile=null; openModal();
+    }
+    function handleFileSelect(input) { var f=input.files[0]; if(!f)return; selectedFile=f; document.getElementById('fileUploadArea').classList.add('has-file'); document.getElementById('fileUploadName').textContent=f.name; }
+    function readFileAsBase64(file) { return new Promise(function(resolve,reject){ var r=new FileReader(); r.onload=function(){resolve(r.result.split(',')[1]);}; r.onerror=reject; r.readAsDataURL(file); }); }
+
+    async function saveMaterial() {
+      var title=document.getElementById('matTitle').value.trim(); var subject=document.getElementById('matSubject').value;
+      if(!title||!subject){toast('נא למלא כותרת ומקצוע','error');return;}
+      var btn=document.getElementById('modalSaveBtn'); btn.disabled=true; btn.textContent='⏳ שומר...';
+      var data={title:title,description:document.getElementById('matDesc').value.trim(),subject:subject,gradeLevel:document.getElementById('matGrade').value,tags:document.getElementById('matTags').value.trim()};
+      var fileBlob=null;
+      if(selectedFile){fileBlob={name:selectedFile.name,mimeType:selectedFile.type,data:await readFileAsBase64(selectedFile)};}
+      try { var r=await apiPost('adminAddMaterial',{token:adminState.token,materialData:data,fileBlob:fileBlob}); if(r.success){toast('החומר נוסף!','success');closeModal();selectedFile=null;loadAdminMaterials();}else toast(r.error||'שגיאה','error'); }
+      catch(e){toast('שגיאה','error');} btn.disabled=false;
+    }
+    async function saveMaterialEdit(id) {
+      var btn=document.getElementById('modalSaveBtn'); btn.disabled=true; btn.textContent='⏳ שומר...';
+      try { var r=await apiPost('adminUpdateMaterial',{token:adminState.token,id:id,materialData:{title:document.getElementById('matTitle').value.trim(),description:document.getElementById('matDesc').value.trim(),subject:document.getElementById('matSubject').value,gradeLevel:document.getElementById('matGrade').value,tags:document.getElementById('matTags').value.trim()}});
+        if(r.success){toast('עודכן!','success');closeModal();loadAdminMaterials();}else toast(r.error||'שגיאה','error');
+      } catch(e){toast('שגיאה','error');} btn.disabled=false;
+    }
+    async function deleteMaterial(id) { if(!confirm('האם למחוק?'))return; try{var r=await apiPost('adminDeleteMaterial',{token:adminState.token,id:id});if(r.success){toast('נמחק!','success');loadAdminMaterials();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');} }
+
+    // ══════ ADMIN SUBJECTS ══════
+    async function loadAdminSubjects() {
+      try { var resp=await apiPost('adminGetSubjects',{token:adminState.token}); if(resp.error==='unauthorized'){doLogout();return;} adminState.subjects=resp.data||[];
+        var tbody=document.getElementById('subjectsTableBody');
+        if(!adminState.subjects.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">אין מקצועות</td></tr>';return;}
+        tbody.innerHTML=adminState.subjects.map(function(s){return '<tr><td style="font-size:1.5rem;">'+s.icon+'</td><td><strong>'+esc(s.name)+'</strong></td><td><span style="display:inline-block;width:20px;height:20px;border-radius:4px;background:'+s.color+';"></span> '+s.color+'</td><td>'+s.order+'</td><td>'+(s.isActive!==false&&s.isActive!=='FALSE'?'<span class="badge badge-success">פעיל</span>':'<span class="badge badge-danger">מושבת</span>')+'</td><td class="actions"><button class="btn btn-ghost btn-sm" onclick="openSubjectModal(\''+s.id+'\')">✏️</button><button class="btn btn-danger btn-sm" onclick="deleteSubject(\''+s.id+'\')">🗑️</button></td></tr>';}).join('');
+      } catch(e){}
+    }
+    function openSubjectModal(editId) {
+      var subj=editId?adminState.subjects.find(function(s){return s.id===editId;}):null;
+      document.getElementById('modalContent').innerHTML=
+        '<div class="modal-header"><div class="modal-title">'+(subj?'עריכת מקצוע':'הוספת מקצוע')+'</div><button class="modal-close" onclick="closeModal()">✕</button></div>'+
+        '<div class="form-group"><label class="form-label">שם *</label><input type="text" class="form-input" id="subjName" value="'+(subj?esc(subj.name):'')+'"></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;"><div class="form-group"><label class="form-label">אייקון</label><input type="text" class="form-input" id="subjIcon" value="'+(subj?subj.icon:'📚')+'" style="text-align:center;font-size:1.3rem;"></div><div class="form-group"><label class="form-label">צבע</label><input type="color" class="form-input" id="subjColor" value="'+(subj?subj.color:'#6366F1')+'" style="height:44px;padding:4px;"></div><div class="form-group"><label class="form-label">סדר</label><input type="number" class="form-input" id="subjOrder" value="'+(subj?subj.order:'99')+'"></div></div>'+
+        '<div class="modal-actions"><button class="btn btn-primary" onclick="'+(subj?"saveSubjectEdit('"+subj.id+"')":"saveSubject()")+'" id="modalSaveBtn">💾 '+(subj?'שמירה':'הוספה')+'</button><button class="btn btn-ghost" onclick="closeModal()">ביטול</button></div>';
+      openModal();
+    }
+    async function saveSubject() { var name=document.getElementById('subjName').value.trim(); if(!name){toast('נא להזין שם','error');return;} var btn=document.getElementById('modalSaveBtn'); btn.disabled=true; try{var r=await apiPost('adminAddSubject',{token:adminState.token,subjectData:{name:name,icon:document.getElementById('subjIcon').value,color:document.getElementById('subjColor').value,order:parseInt(document.getElementById('subjOrder').value)||99}});if(r.success){toast('נוסף!','success');closeModal();loadAdminSubjects();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}btn.disabled=false; }
+    async function saveSubjectEdit(id) { var btn=document.getElementById('modalSaveBtn'); btn.disabled=true; try{var r=await apiPost('adminUpdateSubject',{token:adminState.token,id:id,subjectData:{name:document.getElementById('subjName').value.trim(),icon:document.getElementById('subjIcon').value,color:document.getElementById('subjColor').value,order:parseInt(document.getElementById('subjOrder').value)||99}});if(r.success){toast('עודכן!','success');closeModal();loadAdminSubjects();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}btn.disabled=false; }
+    async function deleteSubject(id) {if(!confirm('למחוק?'))return;try{var r=await apiPost('adminDeleteSubject',{token:adminState.token,id:id});if(r.success){toast('נמחק!','success');loadAdminSubjects();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}}
+
+    // ══════ ADMIN PAGES ══════
+    async function loadAdminPages() {
+      try { var resp=await apiPost('adminGetPages',{token:adminState.token}); if(resp.error==='unauthorized'){doLogout();return;} adminState.pages=resp.data||[];
+        var tbody=document.getElementById('pagesTableBody');
+        if(!adminState.pages.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">אין דפים</td></tr>';return;}
+        tbody.innerHTML=adminState.pages.map(function(p){return '<tr><td><strong>'+esc(p.title)+'</strong></td><td style="font-family:monospace;font-size:0.8rem;color:var(--text-muted);">'+esc(p.slug)+'</td><td>'+(p.isActive!==false&&p.isActive!=='FALSE'?'<span class="badge badge-success">פעיל</span>':'<span class="badge badge-danger">מושבת</span>')+'</td><td style="font-size:0.8rem;">'+formatDate(p.updatedAt)+'</td><td class="actions"><button class="btn btn-ghost btn-sm" onclick="openPageModal(\''+p.id+'\')">✏️</button><button class="btn btn-danger btn-sm" onclick="deletePage(\''+p.id+'\')">🗑️</button></td></tr>';}).join('');
+      } catch(e){}
+    }
+    function openPageModal(editId) {
+      var pg=editId?adminState.pages.find(function(p){return p.id===editId;}):null;
+      document.getElementById('modalContent').innerHTML=
+        '<div class="modal-header"><div class="modal-title">'+(pg?'עריכת דף':'הוספת דף')+'</div><button class="modal-close" onclick="closeModal()">✕</button></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;"><div class="form-group"><label class="form-label">כותרת *</label><input type="text" class="form-input" id="pgTitle" value="'+(pg?esc(pg.title):'')+'"></div><div class="form-group"><label class="form-label">Slug</label><input type="text" class="form-input" id="pgSlug" value="'+(pg?esc(pg.slug):'')+'" style="direction:ltr;" placeholder="about-us"></div></div>'+
+        '<div class="form-group"><label class="form-label">תוכן (HTML)</label><textarea class="form-textarea" id="pgContent" style="min-height:200px;">'+(pg?pg.content||'':'')+'</textarea></div>'+
+        '<div class="modal-actions"><button class="btn btn-primary" onclick="'+(pg?"savePageEdit('"+pg.id+"')":"savePage()")+'" id="modalSaveBtn">💾 '+(pg?'שמירה':'הוספה')+'</button><button class="btn btn-ghost" onclick="closeModal()">ביטול</button></div>';
+      openModal();
+    }
+    async function savePage() { var title=document.getElementById('pgTitle').value.trim();if(!title){toast('נא להזין כותרת','error');return;} var btn=document.getElementById('modalSaveBtn');btn.disabled=true; try{var r=await apiPost('adminAddPage',{token:adminState.token,pageData:{title:title,slug:document.getElementById('pgSlug').value.trim(),content:document.getElementById('pgContent').value}});if(r.success){toast('נוסף!','success');closeModal();loadAdminPages();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}btn.disabled=false; }
+    async function savePageEdit(id) { var btn=document.getElementById('modalSaveBtn');btn.disabled=true; try{var r=await apiPost('adminUpdatePage',{token:adminState.token,id:id,pageData:{title:document.getElementById('pgTitle').value.trim(),slug:document.getElementById('pgSlug').value.trim(),content:document.getElementById('pgContent').value}});if(r.success){toast('עודכן!','success');closeModal();loadAdminPages();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}btn.disabled=false; }
+    async function deletePage(id) {if(!confirm('למחוק?'))return;try{var r=await apiPost('adminDeletePage',{token:adminState.token,id:id});if(r.success){toast('נמחק!','success');loadAdminPages();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}}
+
+    // ══════ ADMIN SETTINGS ══════
+    async function loadAdminSettings() {
+      try{var resp=await apiPost('adminGetSettings',{token:adminState.token});if(resp.error==='unauthorized'){doLogout();return;} adminState.settings=resp.data||{};
+      document.getElementById('setSiteTitle').value=adminState.settings.siteTitle||'';
+      document.getElementById('setHeroSubtitle').value=adminState.settings.heroSubtitle||'';
+      document.getElementById('setFooterText').value=adminState.settings.footerText||'';}catch(e){}
+    }
+    async function saveSettings() { try{var r=await apiPost('adminUpdateSettings',{token:adminState.token,settings:{siteTitle:document.getElementById('setSiteTitle').value.trim(),heroSubtitle:document.getElementById('setHeroSubtitle').value.trim(),footerText:document.getElementById('setFooterText').value.trim()}});if(r.success)toast('נשמר!','success');else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');} }
+    async function changePassword() { var oldPw=document.getElementById('setOldPassword').value;var newPw=document.getElementById('setNewPassword').value;if(!newPw){toast('נא להזין סיסמה חדשה','error');return;} try{var r=await apiPost('adminChangePassword',{token:adminState.token,oldPassword:oldPw,newPassword:newPw});if(r.success){toast('הסיסמה שונתה!','success');document.getElementById('setOldPassword').value='';document.getElementById('setNewPassword').value='';}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');} }
+
+    // ══════ MODAL & TOAST ══════
+    function openModal(){document.getElementById('modalOverlay').classList.add('open');}
+    function closeModal(){document.getElementById('modalOverlay').classList.remove('open');selectedFile=null;}
+    function toast(msg,type){var el=document.getElementById('toast');el.textContent=msg;el.className='toast toast-'+(type||'success')+' show';setTimeout(function(){el.classList.remove('show');},3500);}
+
+    // ══════ HELPERS ══════
+    function esc(str){if(!str)return '';var d=document.createElement('div');d.textContent=str;return d.innerHTML;}
+    function getFileExtension(name){if(!name)return 'FILE';var p=name.split('.');if(p.length>1)return p.pop().toUpperCase();if(name.includes('presentation')||name.includes('pptx'))return 'PPTX';if(name.includes('document')||name.includes('docx'))return 'DOCX';if(name.includes('pdf'))return 'PDF';return 'FILE';}
+    function formatFileSize(bytes){if(!bytes||bytes===0)return '';var k=1024;var s=['B','KB','MB','GB'];var i=Math.floor(Math.log(bytes)/Math.log(k));return parseFloat((bytes/Math.pow(k,i)).toFixed(1))+' '+s[i];}
+    function formatDate(d){if(!d)return '—';try{return new Date(d).toLocaleDateString('he-IL');}catch(e){return '—';}}
+
+    init();
+  </script>
+</body>
+</html>
