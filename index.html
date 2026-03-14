@@ -411,7 +411,7 @@
       <div class="login-sub">הזינו את סיסמת המנהל</div>
       <div id="loginNote" style="color:var(--accent);font-size:0.78rem;margin-bottom:12px;display:none;">כניסה ראשונה — הסיסמה שתזינו תהפוך לסיסמת המנהל</div>
       <div class="fg"><input type="password" class="fi" id="loginPassword" placeholder="סיסמה" onkeypress="if(event.key==='Enter')doLogin()"></div>
-      <div id="loginError" class="ferr" style="text-align:center;margin-bottom:8px;"></div>
+      <div id="loginError" class="ferr" style="text-align:center;margin-bottom:8px;font-size:0.82rem;word-break:break-word;max-height:120px;overflow-y:auto;"></div>
       <button class="btn btn-primary btn-full" id="loginBtn" onclick="doLogin()"><svg><use href="#i-login"/></svg> התחברות</button>
       <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="hideAdminLogin()"><svg><use href="#i-arrow-r"/></svg> חזרה</button>
     </div>
@@ -538,7 +538,7 @@
     /* ═══ ADMIN AUTH ═══ */
     async function showAdminLogin(){closeMM();document.getElementById('adminLoginScreen').style.display='flex';document.getElementById('loginPassword').focus();try{var r=await apiGet('getSettings');document.getElementById('loginNote').style.display=(r.data&&r.data.adminPasswordHash)?'none':'block';}catch(e){}}
     function hideAdminLogin(){document.getElementById('adminLoginScreen').style.display='none';document.getElementById('loginPassword').value='';}
-    async function doLogin(){var pw=document.getElementById('loginPassword').value;if(!pw)return;var b=document.getElementById('loginBtn');b.disabled=true;b.innerHTML='<svg style="animation:spin .8s linear infinite"><use href="#i-loader"/></svg> מתחבר...';try{var r=await apiPost('adminLogin',{password:pw});if(r.success){A.token=r.token;document.getElementById('adminLoginScreen').style.display='none';document.getElementById('adminWrapper').classList.add('open');loadDash();}else{var el=document.getElementById('loginError');el.textContent=r.error||'שגיאה';el.style.display='block';setTimeout(function(){el.style.display='none';},4e3);}}catch(e){document.getElementById('loginError').textContent='שגיאה';document.getElementById('loginError').style.display='block';}b.disabled=false;b.innerHTML='<svg><use href="#i-login"/></svg> התחברות';}
+    async function doLogin(){var pw=document.getElementById('loginPassword').value;if(!pw)return;var b=document.getElementById('loginBtn');b.disabled=true;b.innerHTML='<svg style="animation:spin .8s linear infinite"><use href="#i-loader"/></svg> מתחבר...';try{var r=await apiPost('adminLogin',{password:pw});console.log('[login result]',JSON.stringify(r));if(r.success){A.token=r.token;document.getElementById('adminLoginScreen').style.display='none';document.getElementById('adminWrapper').classList.add('open');loadDash();}else{var el=document.getElementById('loginError');el.textContent=r.error||'שגיאה לא ידועה — בדקו Console (F12)';el.style.display='block';setTimeout(function(){el.style.display='none';},8e3);}}catch(e){console.error('[login error]',e);var el=document.getElementById('loginError');el.textContent='שגיאה: '+e.message;el.style.display='block';setTimeout(function(){el.style.display='none';},12e3);}b.disabled=false;b.innerHTML='<svg><use href="#i-login"/></svg> התחברות';}
     function exitAdmin(){document.getElementById('adminWrapper').classList.remove('open');init();}
     async function doLogout(){if(A.token)try{await apiPost('adminLogout',{token:A.token});}catch(e){}A.token=null;document.getElementById('adminWrapper').classList.remove('open');init();}
 
