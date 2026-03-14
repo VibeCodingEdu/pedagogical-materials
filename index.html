@@ -1,38 +1,612 @@
-/**
- * ═══════════════════════════════════════════
- *  API Configuration
- *  ← הגדירו כאן את כתובת ה-Apps Script שלכם
- * ═══════════════════════════════════════════
- */
-const API_URL = 'https://script.google.com/macros/s/AKfycbylNinJ-ALiWtulmRFYHrI9YJxge6lyVSyBx4pKexTGulHX_THZDr_eZr3mMvGghXQ6/exec';
-//  ↑ החליפו בכתובת שמקבלים אחרי Deploy
-//  למשל: https://script.google.com/macros/s/AKfycbx.../exec
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&family=Secular+One&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/lucide-static@latest/font/lucide.css" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════
+       THEME SYSTEM: Light/Dark + Bento/Glass
+       ═══════════════════════════════════════════ */
+    :root {
+      --font-display: 'Secular One', sans-serif;
+      --font-body: 'Heebo', sans-serif;
+      --radius-sm: 10px; --radius-md: 16px; --radius-lg: 24px; --radius-xl: 32px;
+      --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.1);
+      --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+      /* Accent palette — teal + warm coral */
+      --accent: #0D9488; --accent-light: #14B8A6; --accent-glow: rgba(13,148,136,0.2);
+      --accent-2: #F97316; --accent-2-light: #FB923C;
+    }
 
-/**
- * Public GET request (for reading data)
- */
-async function apiGet(action, params = {}) {
-  const url = new URL(API_URL);
-  url.searchParams.set('action', action);
-  Object.keys(params).forEach(k => {
-    if (params[k]) url.searchParams.set(k, params[k]);
-  });
+    /* ─── LIGHT MODE (default) ─── */
+    :root, [data-color="light"] {
+      --bg-primary: #F8F9FC; --bg-secondary: #FFFFFF; --bg-card: #FFFFFF;
+      --bg-card-hover: #F1F3F9; --bg-nav: rgba(255,255,255,0.82);
+      --bg-input: #F1F3F9;
+      --border: rgba(0,0,0,0.07); --border-accent: rgba(13,148,136,0.25);
+      --text-primary: #111827; --text-secondary: #4B5563; --text-muted: #9CA3AF;
+      --shadow-card: 0 1px 4px rgba(0,0,0,0.06), 0 4px 24px rgba(0,0,0,0.04);
+      --glass-bg: rgba(255,255,255,0.55); --glass-border: rgba(255,255,255,0.6);
+      --glass-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      --bento-gradient-1: linear-gradient(135deg, #ECFDF5, #D1FAE5);
+      --bento-gradient-2: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+      --bento-gradient-3: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+      --bento-gradient-4: linear-gradient(135deg, #FDF4FF, #F3E8FF);
+      --badge-bg: rgba(13,148,136,0.08); --badge-text: var(--accent);
+      --skeleton: linear-gradient(90deg, #F1F3F9 25%, #E5E7EB 50%, #F1F3F9 75%);
+      --overlay: rgba(0,0,0,0.3);
+      --danger: #EF4444; --success: #10B981;
+    }
 
-  const resp = await fetch(url.toString());
-  if (!resp.ok) throw new Error('Network error: ' + resp.status);
-  return await resp.json();
-}
+    /* ─── DARK MODE ─── */
+    [data-color="dark"] {
+      --bg-primary: #0B0F17; --bg-secondary: #111827; --bg-card: #1A2030;
+      --bg-card-hover: #222B3D; --bg-nav: rgba(11,15,23,0.82);
+      --bg-input: #111827;
+      --border: rgba(255,255,255,0.06); --border-accent: rgba(20,184,166,0.3);
+      --text-primary: #F1F5F9; --text-secondary: #94A3B8; --text-muted: #4B5563;
+      --shadow-card: 0 2px 8px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2);
+      --glass-bg: rgba(26,32,48,0.55); --glass-border: rgba(255,255,255,0.08);
+      --glass-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      --bento-gradient-1: linear-gradient(135deg, #0D2818, #052E16);
+      --bento-gradient-2: linear-gradient(135deg, #2D1A0A, #431407);
+      --bento-gradient-3: linear-gradient(135deg, #0C1A2E, #172554);
+      --bento-gradient-4: linear-gradient(135deg, #1E0A2E, #2E1065);
+      --badge-bg: rgba(20,184,166,0.12); --badge-text: var(--accent-light);
+      --skeleton: linear-gradient(90deg, #1A2030 25%, #222B3D 50%, #1A2030 75%);
+      --overlay: rgba(0,0,0,0.6);
+    }
 
-/**
- * Admin POST request (for writing data)
- */
-async function apiPost(action, body = {}) {
-  const resp = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
-    // Note: text/plain avoids CORS preflight with Apps Script
-    body: JSON.stringify({ action, ...body }),
-  });
-  if (!resp.ok) throw new Error('Network error: ' + resp.status);
-  return await resp.json();
-}
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-color="light"]) {
+        --bg-primary: #0B0F17; --bg-secondary: #111827; --bg-card: #1A2030;
+        --bg-card-hover: #222B3D; --bg-nav: rgba(11,15,23,0.82);
+        --bg-input: #111827;
+        --border: rgba(255,255,255,0.06); --border-accent: rgba(20,184,166,0.3);
+        --text-primary: #F1F5F9; --text-secondary: #94A3B8; --text-muted: #4B5563;
+        --shadow-card: 0 2px 8px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2);
+        --glass-bg: rgba(26,32,48,0.55); --glass-border: rgba(255,255,255,0.08);
+        --glass-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        --bento-gradient-1: linear-gradient(135deg, #0D2818, #052E16);
+        --bento-gradient-2: linear-gradient(135deg, #2D1A0A, #431407);
+        --bento-gradient-3: linear-gradient(135deg, #0C1A2E, #172554);
+        --bento-gradient-4: linear-gradient(135deg, #1E0A2E, #2E1065);
+        --badge-bg: rgba(20,184,166,0.12); --badge-text: var(--accent-light);
+        --skeleton: linear-gradient(90deg, #1A2030 25%, #222B3D 50%, #1A2030 75%);
+        --overlay: rgba(0,0,0,0.6);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--bg-primary); color: var(--text-primary); line-height: 1.7; overflow-x: hidden; min-height: 100vh; transition: background 0.5s, color 0.5s; }
+
+    /* Lucide icon base */
+    .icon { display: inline-flex; align-items: center; justify-content: center; }
+    .icon svg { width: 1em; height: 1em; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ═══════════════════════════════════════════
+       NAVIGATION — shared across layouts
+       ═══════════════════════════════════════════ */
+    .nav { position: fixed; top: 0; right: 0; left: 0; z-index: 100; background: var(--bg-nav); backdrop-filter: blur(20px) saturate(180%); border-bottom: 1px solid var(--border); transition: var(--transition); }
+    .nav-inner { max-width: 1320px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; height: 68px; }
+    .nav-logo { display: flex; align-items: center; gap: 12px; font-family: var(--font-display); font-size: 1.1rem; color: var(--text-primary); text-decoration: none; cursor: pointer; letter-spacing: -0.01em; }
+    .nav-logo-mark { width: 38px; height: 38px; border-radius: var(--radius-sm); background: var(--accent); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-link { padding: 7px 14px; border-radius: var(--radius-sm); color: var(--text-secondary); text-decoration: none; font-size: 0.87rem; font-weight: 500; transition: var(--transition); cursor: pointer; border: none; background: none; font-family: var(--font-body); display: inline-flex; align-items: center; gap: 6px; }
+    .nav-link:hover, .nav-link.active { color: var(--text-primary); background: var(--bg-card-hover); }
+    .nav-link.admin-link { color: var(--accent); }
+    .nav-link.admin-link:hover { background: var(--badge-bg); }
+    .nav-actions { display: flex; align-items: center; gap: 6px; }
+    .theme-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); font-size: 1rem; }
+    .theme-toggle:hover { color: var(--text-primary); border-color: var(--border-accent); }
+    .layout-toggle { padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg-card); color: var(--text-secondary); font-family: var(--font-body); font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 5px; }
+    .layout-toggle:hover { border-color: var(--border-accent); color: var(--accent); }
+    .mobile-menu-btn { display: none; background: none; border: none; color: var(--text-primary); font-size: 1.3rem; cursor: pointer; }
+
+    /* ═══════════════════════════════════════════
+       HERO
+       ═══════════════════════════════════════════ */
+    .hero { padding: 140px 28px 80px; text-align: center; }
+    .hero-chip { display: inline-flex; align-items: center; gap: 8px; padding: 5px 16px; border-radius: 100px; background: var(--badge-bg); color: var(--badge-text); font-size: 0.78rem; font-weight: 600; margin-bottom: 24px; animation: fadeUp 0.6s ease both; }
+    .hero-chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    .hero h1 { font-family: var(--font-display); font-size: clamp(2rem,4.5vw,3.2rem); line-height: 1.25; margin-bottom: 16px; animation: fadeUp 0.6s 0.1s ease both; letter-spacing: -0.02em; }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero-sub { font-size: 1.05rem; color: var(--text-secondary); max-width: 520px; margin: 0 auto 36px; font-weight: 400; animation: fadeUp 0.6s 0.2s ease both; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+
+    /* ═══════════════════════════════════════════
+       SEARCH
+       ═══════════════════════════════════════════ */
+    .search-wrap { max-width: 580px; margin: 0 auto; animation: fadeUp 0.6s 0.3s ease both; }
+    .search-box { display: flex; align-items: center; background: var(--bg-card); border: 1.5px solid var(--border); border-radius: var(--radius-lg); padding: 5px 5px 5px 18px; transition: var(--transition); box-shadow: var(--shadow-sm); }
+    .search-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+    .search-box .icon { color: var(--text-muted); font-size: 1.1rem; margin-left: 10px; }
+    .search-input { flex: 1; border: none; background: none; outline: none; font-family: var(--font-body); font-size: 0.95rem; color: var(--text-primary); padding: 12px 0; direction: rtl; }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-btn { padding: 10px 24px; border: none; border-radius: var(--radius-md); background: var(--accent); color: white; font-family: var(--font-body); font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: var(--transition); }
+    .search-btn:hover { background: var(--accent-light); }
+
+    /* ═══════════════════════════════════════════
+       SUBJECT TABS
+       ═══════════════════════════════════════════ */
+    .tabs-section { padding: 16px 28px 48px; }
+    .tabs-row { max-width: 1320px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    .tab-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 20px; border-radius: 100px; background: var(--bg-card); border: 1.5px solid var(--border); color: var(--text-secondary); font-size: 0.87rem; font-weight: 600; cursor: pointer; transition: var(--transition); font-family: var(--font-body); }
+    .tab-btn:hover { border-color: var(--border-accent); color: var(--text-primary); }
+    .tab-btn.active { border-color: var(--accent); background: var(--badge-bg); color: var(--accent); }
+    .tab-btn .icon { font-size: 0.95rem; }
+
+    /* ═══════════════════════════════════════════
+       FILTER BAR
+       ═══════════════════════════════════════════ */
+    .filter-bar { max-width: 1320px; margin: 0 auto 28px; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .filter-bar-right { display: flex; align-items: center; gap: 10px; }
+    .filter-label { color: var(--text-muted); font-size: 0.82rem; font-weight: 500; }
+    .filter-select { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); font-family: var(--font-body); padding: 7px 14px; border-radius: var(--radius-sm); font-size: 0.82rem; cursor: pointer; outline: none; direction: rtl; }
+    .results-count { color: var(--text-muted); font-size: 0.82rem; font-weight: 500; }
+
+    /* ═══════════════════════════════════════════
+       MATERIALS GRID — BENTO LAYOUT (default)
+       ═══════════════════════════════════════════ */
+    .materials-section { padding: 0 28px 80px; }
+    .materials-grid { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+
+    /* Bento: varying sizes for visual interest */
+    [data-layout="bento"] .materials-grid { grid-template-columns: repeat(3, 1fr); }
+    [data-layout="bento"] .material-card:nth-child(5n+1) { grid-column: span 2; }
+    [data-layout="bento"] .material-card:nth-child(7n+4) { grid-row: span 2; }
+
+    .material-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); overflow: hidden;
+      transition: var(--transition); display: flex; flex-direction: column;
+      animation: fadeUp 0.4s ease both; position: relative;
+    }
+    .material-card:hover { transform: translateY(-3px); border-color: var(--border-accent); box-shadow: var(--shadow-lg); }
+
+    /* Bento colored accent strip */
+    [data-layout="bento"] .material-card::before {
+      content: ''; position: absolute; top: 0; right: 0; left: 0; height: 4px;
+      background: var(--card-accent, var(--accent)); border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    /* Glass layout overrides */
+    [data-layout="glass"] .material-card {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      backdrop-filter: blur(16px) saturate(180%);
+      box-shadow: var(--glass-shadow);
+    }
+    [data-layout="glass"] .material-card::before { display: none; }
+    [data-layout="glass"] .materials-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+
+    .card-inner { padding: 24px; flex: 1; display: flex; flex-direction: column; }
+    .card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .card-subject { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 700; background: var(--badge-bg); color: var(--badge-text); }
+    .card-type { padding: 4px 10px; border-radius: var(--radius-sm); background: var(--bg-card-hover); color: var(--text-muted); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .card-title { font-family: var(--font-display); font-size: 1.05rem; line-height: 1.5; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .card-desc { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 12px; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 16px; }
+    .card-tag { padding: 2px 9px; border-radius: 100px; background: var(--bg-card-hover); color: var(--text-muted); font-size: 0.7rem; font-weight: 500; }
+    .card-bottom { margin-top: auto; display: flex; align-items: center; justify-content: space-between; padding-top: 16px; border-top: 1px solid var(--border); }
+    .card-meta { display: flex; align-items: center; gap: 14px; font-size: 0.76rem; color: var(--text-muted); }
+    .card-meta-item { display: inline-flex; align-items: center; gap: 4px; }
+    .dl-btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 18px; border-radius: var(--radius-sm); background: var(--accent); color: white; border: none; font-family: var(--font-body); font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: var(--transition); }
+    .dl-btn:hover { background: var(--accent-light); transform: scale(1.03); }
+
+    .empty-state { text-align: center; padding: 80px 24px; max-width: 380px; margin: 0 auto; }
+    .empty-state-icon { font-size: 2.5rem; margin-bottom: 14px; color: var(--text-muted); }
+    .empty-state-title { font-family: var(--font-display); font-size: 1.15rem; margin-bottom: 6px; }
+    .empty-state-text { color: var(--text-secondary); font-size: 0.88rem; }
+
+    .page-content { max-width: 780px; margin: 0 auto; padding: 130px 28px 80px; }
+    .page-content h2 { font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 20px; }
+    .page-content p { color: var(--text-secondary); line-height: 1.8; margin-bottom: 14px; }
+
+    .footer { border-top: 1px solid var(--border); padding: 36px 28px; text-align: center; color: var(--text-muted); font-size: 0.8rem; }
+
+    .skeleton { background: var(--skeleton); background-size: 200% 100%; animation: shimmer 1.5s ease-in-out infinite; border-radius: var(--radius-sm); }
+    @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+    .skeleton-card { height: 260px; border-radius: var(--radius-lg); }
+
+    /* ═══════ ADMIN STYLES ═══════ */
+    .login-screen { display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;position:fixed;inset:0;z-index:500;background:var(--bg-primary); }
+    .login-card { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:44px 36px;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-lg); }
+    .login-icon { width:56px;height:56px;border-radius:var(--radius-md);background:var(--accent);margin:0 auto 20px;display:flex;align-items:center;justify-content:center;color:white;font-size:1.4rem; }
+    .login-title { font-family:var(--font-display);font-size:1.3rem;margin-bottom:6px; }
+    .login-subtitle { color:var(--text-secondary);font-size:0.85rem;margin-bottom:28px; }
+
+    .form-group { margin-bottom:18px;text-align:right; }
+    .form-label { display:block;font-size:0.82rem;font-weight:600;color:var(--text-secondary);margin-bottom:5px; }
+    .form-input,.form-select,.form-textarea { width:100%;padding:11px 14px;background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:var(--font-body);font-size:0.92rem;outline:none;transition:var(--transition);direction:rtl; }
+    .form-input:focus,.form-select:focus,.form-textarea:focus { border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow); }
+    .form-textarea { min-height:110px;resize:vertical; }
+    .form-error { color:var(--danger);font-size:0.78rem;margin-top:4px;display:none; }
+
+    .btn { display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 22px;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:0.87rem;font-weight:700;cursor:pointer;transition:var(--transition);white-space:nowrap; }
+    .btn-primary { background:var(--accent);color:white; }
+    .btn-primary:hover { background:var(--accent-light); }
+    .btn-danger { background:var(--danger);color:white; }
+    .btn-ghost { background:var(--bg-card-hover);color:var(--text-secondary);border:1px solid var(--border); }
+    .btn-ghost:hover { color:var(--text-primary); }
+    .btn-sm { padding:7px 12px;font-size:0.78rem; }
+    .btn-full { width:100%; }
+    .btn:disabled { opacity:0.5;cursor:not-allowed; }
+
+    .admin-wrapper { position:fixed;inset:0;z-index:400;background:var(--bg-primary);display:none; }
+    .admin-wrapper.open { display:flex; }
+    .admin-layout { display:flex;width:100%;height:100%; }
+    .sidebar { width:240px;background:var(--bg-secondary);border-left:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0; }
+    .sidebar-logo { display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:28px;font-family:var(--font-display);font-size:0.95rem; }
+    .sidebar-logo-mark { width:32px;height:32px;border-radius:var(--radius-sm);background:var(--accent);display:flex;align-items:center;justify-content:center;color:white;font-size:0.9rem; }
+    .sidebar-nav { flex:1; }
+    .sidebar-nav-item { display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--radius-sm);color:var(--text-secondary);font-size:0.87rem;font-weight:500;cursor:pointer;transition:var(--transition);margin-bottom:3px;border:none;background:none;width:100%;text-align:right;font-family:var(--font-body); }
+    .sidebar-nav-item:hover { background:var(--bg-card-hover);color:var(--text-primary); }
+    .sidebar-nav-item.active { background:var(--badge-bg);color:var(--accent); }
+    .sidebar-footer { padding-top:14px;border-top:1px solid var(--border); }
+    .admin-main { flex:1;padding:28px;overflow-y:auto; }
+
+    .section-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px; }
+    .section-title { font-family:var(--font-display);font-size:1.3rem; }
+    .section-subtitle { color:var(--text-secondary);font-size:0.82rem;margin-top:3px; }
+
+    .stats-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:28px; }
+    .stat-card { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:22px; }
+    .stat-card-icon { font-size:1.3rem;color:var(--accent);margin-bottom:10px; }
+    .stat-card-value { font-family:var(--font-display);font-size:1.8rem;line-height:1; }
+    .stat-card-label { color:var(--text-muted);font-size:0.78rem;margin-top:5px; }
+
+    .data-table-container { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden; }
+    .data-table { width:100%;border-collapse:collapse;text-align:right; }
+    .data-table th { padding:12px 14px;font-size:0.77rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;border-bottom:1px solid var(--border);background:var(--bg-secondary); }
+    .data-table td { padding:12px 14px;font-size:0.85rem;border-bottom:1px solid var(--border); }
+    .data-table tr:hover td { background:var(--bg-card-hover); }
+    .data-table .actions { display:flex;gap:5px; }
+    .badge { display:inline-block;padding:2px 9px;border-radius:100px;font-size:0.7rem;font-weight:700; }
+    .badge-success { background:rgba(16,185,129,0.12);color:var(--success); }
+    .badge-danger { background:rgba(239,68,68,0.12);color:var(--danger); }
+
+    .modal-overlay { position:fixed;inset:0;background:var(--overlay);backdrop-filter:blur(6px);z-index:600;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;visibility:hidden;transition:var(--transition); }
+    .modal-overlay.open { opacity:1;visibility:visible; }
+    .modal { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;transform:translateY(16px);transition:var(--transition); }
+    .modal-overlay.open .modal { transform:translateY(0); }
+    .modal-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:22px; }
+    .modal-title { font-family:var(--font-display);font-size:1.1rem; }
+    .modal-close { background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer; }
+    .modal-actions { display:flex;gap:8px;margin-top:22px; }
+
+    .file-upload-area { border:2px dashed var(--border);border-radius:var(--radius-md);padding:28px;text-align:center;cursor:pointer;transition:var(--transition); }
+    .file-upload-area:hover { border-color:var(--accent); }
+    .file-upload-area.has-file { border-color:var(--success);background:rgba(16,185,129,0.04); }
+    .file-upload-icon { font-size:1.8rem;margin-bottom:6px;color:var(--text-muted); }
+    .file-upload-text { color:var(--text-secondary);font-size:0.82rem; }
+    .file-upload-name { color:var(--accent);font-weight:700;font-size:0.88rem;margin-top:6px; }
+
+    .toast { position:fixed;bottom:20px;left:20px;z-index:700;padding:12px 22px;border-radius:var(--radius-md);font-size:0.87rem;font-weight:600;transform:translateY(80px);opacity:0;transition:var(--transition); }
+    .toast.show { transform:translateY(0);opacity:1; }
+    .toast-success { background:var(--success);color:white; }
+    .toast-error { background:var(--danger);color:white; }
+
+    @media (max-width: 768px) {
+      .nav-links,.nav-actions .layout-toggle { display:none; }
+      .mobile-menu-btn { display:block; }
+      .nav-links.open { display:flex;flex-direction:column;position:absolute;top:68px;right:0;left:0;background:var(--bg-secondary);padding:14px;border-bottom:1px solid var(--border); }
+      .hero { padding:120px 16px 50px; }
+      .materials-grid,[data-layout="bento"] .materials-grid { grid-template-columns:1fr!important; }
+      [data-layout="bento"] .material-card:nth-child(5n+1) { grid-column:span 1; }
+      [data-layout="bento"] .material-card:nth-child(7n+4) { grid-row:span 1; }
+      .filter-bar { flex-direction:column;align-items:flex-start; }
+      .sidebar { display:none; }
+      .admin-main { padding:14px; }
+      .stats-grid { grid-template-columns:repeat(2,1fr); }
+      .data-table-container { overflow-x:auto; }
+    }
+    ::-webkit-scrollbar { width:7px; }
+    ::-webkit-scrollbar-track { background:var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background:var(--bg-card-hover);border-radius:100px; }
+  </style>
+</head>
+<body data-layout="bento">
+  <!-- PUBLIC SITE -->
+  <div id="publicSite">
+    <nav class="nav"><div class="nav-inner">
+      <a class="nav-logo" onclick="navigateTo('home')">
+        <div class="nav-logo-mark"><i class="lucide-book-open"></i></div>
+        <span id="navTitle">מרכז החומרים</span>
+      </a>
+      <div class="nav-links" id="navLinks">
+        <button class="nav-link active" onclick="navigateTo('home')"><i class="lucide-home"></i> דף הבית</button>
+        <div id="navSubjects" style="display:contents;"></div>
+        <button class="nav-link admin-link" onclick="showAdminLogin()"><i class="lucide-lock"></i> ניהול</button>
+      </div>
+      <div class="nav-actions">
+        <button class="layout-toggle" onclick="toggleLayout()" id="layoutBtn" title="החלף עיצוב"><i class="lucide-layout-grid"></i> <span id="layoutLabel">גלאס</span></button>
+        <button class="theme-toggle" onclick="toggleColor()" id="colorBtn" title="בהיר/כהה"><i class="lucide-sun"></i></button>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="lucide-menu"></i></button>
+      </div>
+    </div></nav>
+
+    <main>
+      <div id="homeView">
+        <section class="hero">
+          <div class="hero-chip"><span class="hero-chip-dot"></span> חומרים חדשים מתעדכנים באופן שוטף</div>
+          <h1 id="heroTitle">מרכז החומרים <em>הפדגוגיים</em></h1>
+          <p class="hero-sub" id="heroSubtitle">חומרי לימוד איכותיים למורים בבית הספר היסודי — מצגות, דפי עבודה וחומרים פדגוגיים מוכנים להורדה</p>
+          <div class="search-wrap"><div class="search-box">
+            <span class="icon"><i class="lucide-search"></i></span>
+            <input type="text" class="search-input" id="searchInput" placeholder="חיפוש לפי נושא, כיתה או מילת מפתח..." oninput="debounceSearch()">
+            <button class="search-btn" onclick="performSearch()">חיפוש</button>
+          </div></div>
+        </section>
+        <section class="tabs-section"><div class="tabs-row" id="subjectsGrid"></div></section>
+        <div class="filter-bar" id="filterBar" style="display:none;">
+          <div class="filter-bar-right"><span class="filter-label">כיתה:</span>
+            <select class="filter-select" id="gradeFilter" onchange="applyFilters()">
+              <option value="">הכל</option><option value="א">א׳</option><option value="ב">ב׳</option><option value="ג">ג׳</option><option value="ד">ד׳</option><option value="ה">ה׳</option><option value="ו">ו׳</option><option value="ז">ז׳</option><option value="ח">ח׳</option>
+            </select></div>
+          <span class="results-count" id="resultsCount"></span>
+        </div>
+        <section class="materials-section"><div class="materials-grid" id="materialsGrid"></div></section>
+      </div>
+      <div id="pageView" style="display:none;"><div class="page-content" id="pageContent"></div></div>
+    </main>
+    <footer class="footer"><p id="footerText">© 2026 מרכז החומרים הפדגוגיים. כל הזכויות שמורות.</p></footer>
+  </div>
+
+  <!-- ADMIN LOGIN -->
+  <div id="adminLoginScreen" class="login-screen" style="display:none;">
+    <div class="login-card">
+      <div class="login-icon"><i class="lucide-shield"></i></div>
+      <div class="login-title">כניסה לניהול</div>
+      <div class="login-subtitle">הזינו את סיסמת המנהל כדי להמשיך</div>
+      <div id="loginNote" style="color:var(--accent);font-size:0.8rem;margin-bottom:14px;display:none;">כניסה ראשונה — הסיסמה שתזינו תהפוך לסיסמת המנהל</div>
+      <div class="form-group"><input type="password" class="form-input" id="loginPassword" placeholder="סיסמת מנהל" onkeypress="if(event.key==='Enter')doLogin()"></div>
+      <div id="loginError" class="form-error" style="text-align:center;margin-bottom:10px;"></div>
+      <button class="btn btn-primary btn-full" id="loginBtn" onclick="doLogin()"><i class="lucide-log-in"></i> התחברות</button>
+      <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="hideAdminLogin()"><i class="lucide-arrow-right"></i> חזרה לאתר</button>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminWrapper" class="admin-wrapper"><div class="admin-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><div class="sidebar-logo-mark"><i class="lucide-settings-2"></i></div><span>ניהול האתר</span></div>
+      <nav class="sidebar-nav" id="adminSidebarNav">
+        <button class="sidebar-nav-item active" onclick="showAdminSection('dashboard',this)"><i class="lucide-bar-chart-3"></i> לוח בקרה</button>
+        <button class="sidebar-nav-item" onclick="showAdminSection('materials',this)"><i class="lucide-file-text"></i> חומרים</button>
+        <button class="sidebar-nav-item" onclick="showAdminSection('subjects',this)"><i class="lucide-layers"></i> מקצועות</button>
+        <button class="sidebar-nav-item" onclick="showAdminSection('pages',this)"><i class="lucide-file-plus"></i> דפים</button>
+        <button class="sidebar-nav-item" onclick="showAdminSection('settings',this)"><i class="lucide-sliders-horizontal"></i> הגדרות</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="sidebar-nav-item" onclick="exitAdmin()"><i class="lucide-globe"></i> חזרה לאתר</button>
+        <button class="sidebar-nav-item" style="color:var(--danger);" onclick="doLogout()"><i class="lucide-log-out"></i> התנתקות</button>
+      </div>
+    </aside>
+    <main class="admin-main">
+      <section id="adm-dashboard">
+        <div class="section-header"><div><div class="section-title">לוח בקרה</div><div class="section-subtitle">סקירה כללית</div></div></div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-card-icon"><i class="lucide-file-text"></i></div><div class="stat-card-value" id="statMaterials">—</div><div class="stat-card-label">חומרים</div></div>
+          <div class="stat-card"><div class="stat-card-icon"><i class="lucide-layers"></i></div><div class="stat-card-value" id="statSubjects">—</div><div class="stat-card-label">מקצועות</div></div>
+          <div class="stat-card"><div class="stat-card-icon"><i class="lucide-file-plus"></i></div><div class="stat-card-value" id="statPages">—</div><div class="stat-card-label">דפים</div></div>
+          <div class="stat-card"><div class="stat-card-icon"><i class="lucide-download"></i></div><div class="stat-card-value" id="statDownloads">—</div><div class="stat-card-label">הורדות</div></div>
+        </div>
+        <div class="section-header"><div class="section-title" style="font-size:1rem;">חומרים אחרונים</div></div>
+        <div class="data-table-container"><table class="data-table"><thead><tr><th>כותרת</th><th>מקצוע</th><th>כיתה</th><th>תאריך</th></tr></thead><tbody id="recentMaterialsBody"><tr><td colspan="4" style="text-align:center;color:var(--text-muted);">טוען...</td></tr></tbody></table></div>
+      </section>
+      <section id="adm-materials" style="display:none;">
+        <div class="section-header"><div><div class="section-title">ניהול חומרים</div></div><button class="btn btn-primary" onclick="openMaterialModal()"><i class="lucide-plus"></i> הוספת חומר</button></div>
+        <div class="data-table-container"><table class="data-table"><thead><tr><th>כותרת</th><th>מקצוע</th><th>כיתה</th><th>קובץ</th><th>הורדות</th><th>סטטוס</th><th>פעולות</th></tr></thead><tbody id="materialsTableBody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);">טוען...</td></tr></tbody></table></div>
+      </section>
+      <section id="adm-subjects" style="display:none;">
+        <div class="section-header"><div><div class="section-title">ניהול מקצועות</div></div><button class="btn btn-primary" onclick="openSubjectModal()"><i class="lucide-plus"></i> הוספת מקצוע</button></div>
+        <div class="data-table-container"><table class="data-table"><thead><tr><th>אייקון</th><th>שם</th><th>צבע</th><th>סדר</th><th>סטטוס</th><th>פעולות</th></tr></thead><tbody id="subjectsTableBody"><tr><td colspan="6" style="text-align:center;color:var(--text-muted);">טוען...</td></tr></tbody></table></div>
+      </section>
+      <section id="adm-pages" style="display:none;">
+        <div class="section-header"><div><div class="section-title">ניהול דפים</div></div><button class="btn btn-primary" onclick="openPageModal()"><i class="lucide-plus"></i> הוספת דף</button></div>
+        <div class="data-table-container"><table class="data-table"><thead><tr><th>כותרת</th><th>Slug</th><th>סטטוס</th><th>עודכן</th><th>פעולות</th></tr></thead><tbody id="pagesTableBody"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);">טוען...</td></tr></tbody></table></div>
+      </section>
+      <section id="adm-settings" style="display:none;">
+        <div class="section-header"><div><div class="section-title">הגדרות</div></div></div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:28px;max-width:600px;">
+          <div class="form-group"><label class="form-label">כותרת האתר</label><input type="text" class="form-input" id="setSiteTitle"></div>
+          <div class="form-group"><label class="form-label">כותרת משנה</label><input type="text" class="form-input" id="setHeroSubtitle"></div>
+          <div class="form-group"><label class="form-label">טקסט Footer</label><input type="text" class="form-input" id="setFooterText"></div>
+          <hr style="border-color:var(--border);margin:20px 0;">
+          <div class="section-title" style="font-size:0.95rem;margin-bottom:14px;">שינוי סיסמה</div>
+          <div class="form-group"><label class="form-label">סיסמה נוכחית</label><input type="password" class="form-input" id="setOldPassword"></div>
+          <div class="form-group"><label class="form-label">סיסמה חדשה</label><input type="password" class="form-input" id="setNewPassword"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary" onclick="saveSettings()"><i class="lucide-save"></i> שמירה</button><button class="btn btn-ghost" onclick="changePassword()"><i class="lucide-key-round"></i> שינוי סיסמה</button></div>
+        </div>
+      </section>
+    </main>
+  </div></div>
+
+  <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalContent"></div></div>
+  <div class="toast" id="toast"></div>
+
+  <script src="api.js"></script>
+  <script>
+    /* ═══════ THEME & LAYOUT ═══════ */
+    function getSystemColor() { return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+    function applyColor(c) {
+      document.documentElement.setAttribute('data-color', c);
+      document.getElementById('colorBtn').innerHTML = c === 'dark' ? '<i class="lucide-moon"></i>' : '<i class="lucide-sun"></i>';
+    }
+    function toggleColor() {
+      var cur = document.documentElement.getAttribute('data-color') || getSystemColor();
+      var next = cur === 'dark' ? 'light' : 'dark';
+      applyColor(next); localStorage.setItem('color', next);
+    }
+    function toggleLayout() {
+      var cur = document.body.getAttribute('data-layout');
+      var next = cur === 'bento' ? 'glass' : 'bento';
+      document.body.setAttribute('data-layout', next);
+      document.getElementById('layoutLabel').textContent = next === 'bento' ? 'גלאס' : 'בנטו';
+      document.getElementById('layoutBtn').querySelector('i').className = next === 'bento' ? 'lucide-layout-grid' : 'lucide-grid-2x2';
+      localStorage.setItem('layout', next);
+    }
+    // Init theme
+    (function(){
+      var savedColor = localStorage.getItem('color');
+      applyColor(savedColor || getSystemColor());
+      var savedLayout = localStorage.getItem('layout') || 'bento';
+      document.body.setAttribute('data-layout', savedLayout);
+      if(savedLayout==='glass'){ document.getElementById('layoutLabel').textContent='בנטו'; document.getElementById('layoutBtn').querySelector('i').className='lucide-grid-2x2'; }
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e){ if(!localStorage.getItem('color')) applyColor(e.matches?'dark':'light'); });
+    })();
+
+    /* ═══════ STATE ═══════ */
+    var state = { subjects:[], materials:[], settings:{}, currentSubject:null, currentSearch:'', currentGrade:'', searchTimeout:null };
+    var adminState = { token:null, materials:[], subjects:[], pages:[], settings:{} };
+
+    /* Subject icon mapping — Lucide class names instead of emoji */
+    var SUBJECT_ICONS = { 'אנגלית':'lucide-languages','מדעים':'lucide-flask-conical','גיאוגרפיה':'lucide-map-pin','תנ"ך':'lucide-book-open','הלכה':'lucide-scale','מתמטיקה':'lucide-calculator','היסטוריה':'lucide-landmark' };
+    function subjectIcon(name, fallbackIcon) {
+      var cls = SUBJECT_ICONS[name] || (fallbackIcon && fallbackIcon.length < 6 ? null : 'lucide-folder');
+      if (cls) return '<i class="'+cls+'"></i>';
+      return fallbackIcon || '<i class="lucide-folder"></i>';
+    }
+
+    /* Bento gradient rotation */
+    var GRADIENTS = ['var(--bento-gradient-1)','var(--bento-gradient-2)','var(--bento-gradient-3)','var(--bento-gradient-4)'];
+
+    /* ═══════ PUBLIC FUNCTIONS ═══════ */
+    async function init() {
+      showLoadingGrid();
+      try {
+        var res = await Promise.all([apiGet('getSubjects'), apiGet('getSettings')]);
+        state.subjects = res[0].data || []; state.settings = res[1].data || {};
+        applySettings(); renderSubjects(); await loadMaterials();
+      } catch(e) { console.error(e); }
+    }
+
+    function applySettings() {
+      var s = state.settings;
+      if (s.siteTitle) { document.getElementById('heroTitle').innerHTML = s.siteTitle.replace(/(\S+)$/, '<em>$1</em>'); document.getElementById('navTitle').textContent = s.siteTitle; }
+      if (s.heroSubtitle) document.getElementById('heroSubtitle').textContent = s.heroSubtitle;
+      if (s.footerText) document.getElementById('footerText').textContent = s.footerText;
+    }
+
+    function renderSubjects() {
+      var grid = document.getElementById('subjectsGrid');
+      var navSub = document.getElementById('navSubjects');
+      grid.innerHTML = '<button class="tab-btn '+(!state.currentSubject?'active':'')+'" onclick="filterBySubject(null)"><i class="lucide-layout-list"></i> הכל</button>' +
+        state.subjects.map(function(s){ return '<button class="tab-btn '+(state.currentSubject===s.name?'active':'')+'" onclick="filterBySubject(\''+s.name+'\')" style="'+(state.currentSubject===s.name?'border-color:'+s.color+';':'')+'">'+subjectIcon(s.name, s.icon)+' '+s.name+'</button>'; }).join('');
+      navSub.innerHTML = state.subjects.map(function(s){ return '<button class="nav-link" onclick="filterBySubject(\''+s.name+'\')">'+subjectIcon(s.name, s.icon)+' '+s.name+'</button>'; }).join('');
+    }
+
+    function filterBySubject(n) { state.currentSubject=n; renderSubjects(); loadMaterials(); }
+
+    async function loadMaterials() {
+      showLoadingGrid();
+      var p={}; if(state.currentSubject)p.subject=state.currentSubject; if(state.currentSearch)p.search=state.currentSearch; if(state.currentGrade)p.gradeLevel=state.currentGrade;
+      try { var r=await apiGet('getMaterials',p); state.materials=r.data||[]; renderMaterials(); } catch(e){ state.materials=[]; renderMaterials(); }
+    }
+
+    function renderMaterials() {
+      var grid=document.getElementById('materialsGrid'), fb=document.getElementById('filterBar'), cnt=document.getElementById('resultsCount');
+      if(!state.materials.length && !state.currentSearch && !state.currentSubject) {
+        fb.style.display='none';
+        grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon"><i class="lucide-inbox"></i></div><div class="empty-state-title">אין חומרים עדיין</div><div class="empty-state-text">חומרים חדשים יתווספו בקרוב</div></div>';
+        return;
+      }
+      fb.style.display='flex'; cnt.textContent=state.materials.length+' חומרים';
+      if(!state.materials.length) {
+        grid.innerHTML='<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon"><i class="lucide-search-x"></i></div><div class="empty-state-title">לא נמצאו תוצאות</div><div class="empty-state-text">נסו מילות חיפוש אחרות</div></div>';
+        return;
+      }
+      grid.innerHTML = state.materials.map(function(m,i){
+        var subj=state.subjects.find(function(s){return s.name===m.subject;});
+        var sc=subj?subj.color:'#0D9488';
+        var ext=getFileExtension(m.fileName||m.fileType);
+        var size=formatFileSize(m.fileSize);
+        var tags=m.tags?m.tags.split(',').map(function(t){return t.trim();}).filter(Boolean):[];
+        var grad=GRADIENTS[i%GRADIENTS.length];
+        return '<div class="material-card" style="animation-delay:'+i*0.04+'s;--card-accent:'+sc+';">'+
+          '<div class="card-inner">'+
+            '<div class="card-top"><span class="card-subject" style="background:'+sc+'12;color:'+sc+';">'+subjectIcon(m.subject,subj?subj.icon:'')+' '+(m.subject||'כללי')+'</span><span class="card-type">'+ext+'</span></div>'+
+            '<div class="card-title">'+esc(m.title)+'</div>'+
+            (m.description?'<div class="card-desc">'+esc(m.description)+'</div>':'')+
+            (tags.length?'<div class="card-tags">'+tags.slice(0,3).map(function(t){return '<span class="card-tag">'+esc(t)+'</span>';}).join('')+'</div>':'')+
+            '<div class="card-bottom"><div class="card-meta">'+
+              (m.gradeLevel?'<span class="card-meta-item"><i class="lucide-graduation-cap"></i> '+m.gradeLevel+'</span>':'')+
+              (size?'<span class="card-meta-item"><i class="lucide-hard-drive"></i> '+size+'</span>':'')+
+              '<span class="card-meta-item"><i class="lucide-download"></i> '+(m.downloadCount||0)+'</span>'+
+            '</div><button class="dl-btn" onclick="downloadMaterial(\''+m.id+'\',this)"><i class="lucide-download"></i> הורדה</button></div>'+
+          '</div></div>';
+      }).join('');
+    }
+
+    function showLoadingGrid() { document.getElementById('materialsGrid').innerHTML=Array(6).fill(0).map(function(){return '<div class="skeleton skeleton-card"></div>';}).join(''); }
+
+    async function downloadMaterial(id,btn) { btn.innerHTML='<i class="lucide-loader-2"></i> טוען...'; btn.disabled=true; try{var r=await apiGet('getDownloadUrl',{id:id});if(r.data)window.open(r.data,'_blank');else alert('שגיאה');}catch(e){alert('שגיאה');} btn.innerHTML='<i class="lucide-download"></i> הורדה'; btn.disabled=false; }
+    function debounceSearch(){clearTimeout(state.searchTimeout);state.searchTimeout=setTimeout(performSearch,400);}
+    function performSearch(){state.currentSearch=document.getElementById('searchInput').value.trim();loadMaterials();}
+    function applyFilters(){state.currentGrade=document.getElementById('gradeFilter').value;loadMaterials();}
+    function navigateTo(t){document.getElementById('homeView').style.display=t==='home'?'block':'none';document.getElementById('pageView').style.display=t!=='home'?'block':'none';closeMobileMenu();if(t==='home'){state.currentSubject=null;state.currentSearch='';document.getElementById('searchInput').value='';renderSubjects();loadMaterials();}}
+    async function navigateToPage(slug){navigateTo('page');try{var r=await apiGet('getPage',{slug:slug});var pg=r.data;document.getElementById('pageContent').innerHTML=pg?'<h2>'+esc(pg.title)+'</h2><div>'+pg.content+'</div>':'<div class="empty-state"><div class="empty-state-icon"><i class="lucide-file-x"></i></div><div class="empty-state-title">הדף לא נמצא</div></div>';}catch(e){}}
+    function toggleMobileMenu(){document.getElementById('navLinks').classList.toggle('open');}
+    function closeMobileMenu(){document.getElementById('navLinks').classList.remove('open');}
+
+    /* ═══════ ADMIN AUTH ═══════ */
+    async function showAdminLogin(){closeMobileMenu();document.getElementById('adminLoginScreen').style.display='flex';document.getElementById('loginPassword').focus();try{var r=await apiGet('getSettings');var s=r.data||{};document.getElementById('loginNote').style.display=s.adminPasswordHash?'none':'block';}catch(e){}}
+    function hideAdminLogin(){document.getElementById('adminLoginScreen').style.display='none';document.getElementById('loginPassword').value='';}
+    async function doLogin(){var pw=document.getElementById('loginPassword').value;if(!pw)return;var btn=document.getElementById('loginBtn');btn.disabled=true;btn.innerHTML='<i class="lucide-loader-2"></i> מתחבר...';try{var r=await apiPost('adminLogin',{password:pw});if(r.success){adminState.token=r.token;document.getElementById('adminLoginScreen').style.display='none';document.getElementById('adminWrapper').classList.add('open');loadAdminDashboard();}else{var el=document.getElementById('loginError');el.textContent=r.error||'שגיאה';el.style.display='block';setTimeout(function(){el.style.display='none';},4000);}}catch(e){var el=document.getElementById('loginError');el.textContent='שגיאה';el.style.display='block';}btn.disabled=false;btn.innerHTML='<i class="lucide-log-in"></i> התחברות';}
+    function exitAdmin(){document.getElementById('adminWrapper').classList.remove('open');init();}
+    async function doLogout(){if(adminState.token){try{await apiPost('adminLogout',{token:adminState.token});}catch(e){}}adminState.token=null;document.getElementById('adminWrapper').classList.remove('open');init();}
+
+    /* ═══════ ADMIN SECTIONS ═══════ */
+    function showAdminSection(n,b){document.querySelectorAll('[id^="adm-"]').forEach(function(el){el.style.display='none';});document.getElementById('adm-'+n).style.display='block';document.querySelectorAll('#adminSidebarNav .sidebar-nav-item').forEach(function(el){el.classList.remove('active');});if(b)b.classList.add('active');switch(n){case 'dashboard':loadAdminDashboard();break;case 'materials':loadAdminMaterials();break;case 'subjects':loadAdminSubjects();break;case 'pages':loadAdminPages();break;case 'settings':loadAdminSettings();break;}}
+
+    async function loadAdminDashboard(){try{var r=await apiPost('adminGetStats',{token:adminState.token});if(r.error==='unauthorized'){doLogout();return;}var s=r.data;document.getElementById('statMaterials').textContent=s.totalMaterials;document.getElementById('statSubjects').textContent=s.totalSubjects;document.getElementById('statPages').textContent=s.totalPages;document.getElementById('statDownloads').textContent=s.totalDownloads;var tb=document.getElementById('recentMaterialsBody');tb.innerHTML=(s.recentMaterials&&s.recentMaterials.length)?s.recentMaterials.map(function(m){return '<tr><td>'+esc(m.title)+'</td><td>'+esc(m.subject)+'</td><td>'+(m.gradeLevel||'—')+'</td><td>'+formatDate(m.createdAt)+'</td></tr>';}).join(''):'<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">אין חומרים</td></tr>';}catch(e){}}
+
+    /* ═══════ ADMIN MATERIALS ═══════ */
+    async function loadAdminMaterials(){try{var s=await apiPost('adminGetSubjects',{token:adminState.token});adminState.subjects=s.data||[];var m=await apiPost('adminGetAllMaterials',{token:adminState.token});if(m.error==='unauthorized'){doLogout();return;}adminState.materials=m.data||[];var tb=document.getElementById('materialsTableBody');if(!adminState.materials.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">אין חומרים</td></tr>';return;}tb.innerHTML=adminState.materials.map(function(m){return '<tr><td><strong>'+esc(m.title)+'</strong></td><td>'+esc(m.subject)+'</td><td>'+(m.gradeLevel||'—')+'</td><td style="font-size:0.78rem;color:var(--text-muted);">'+esc(m.fileName||'—')+'</td><td>'+(m.downloadCount||0)+'</td><td>'+(m.isActive!==false&&m.isActive!=='FALSE'?'<span class="badge badge-success">פעיל</span>':'<span class="badge badge-danger">מושבת</span>')+'</td><td class="actions"><button class="btn btn-ghost btn-sm" onclick="openMaterialModal(\''+m.id+'\')"><i class="lucide-pencil"></i></button><button class="btn btn-danger btn-sm" onclick="deleteMaterial(\''+m.id+'\')"><i class="lucide-trash-2"></i></button></td></tr>';}).join('');}catch(e){}}
+
+    var selectedFile=null;
+    function openMaterialModal(editId){var mat=editId?adminState.materials.find(function(m){return m.id===editId;}):null;var opts=(adminState.subjects||[]).map(function(s){return '<option value="'+esc(s.name)+'" '+(mat&&mat.subject===s.name?'selected':'')+'>'+esc(s.name)+'</option>';}).join('');var grades=['א','ב','ג','ד','ה','ו','ז','ח'].map(function(g){return '<option value="'+g+'" '+(mat&&mat.gradeLevel===g?'selected':'')+'>כיתה '+g+'׳</option>';}).join('');document.getElementById('modalContent').innerHTML='<div class="modal-header"><div class="modal-title">'+(mat?'עריכת חומר':'הוספת חומר חדש')+'</div><button class="modal-close" onclick="closeModal()"><i class="lucide-x"></i></button></div><div class="form-group"><label class="form-label">כותרת *</label><input type="text" class="form-input" id="matTitle" value="'+(mat?esc(mat.title):'')+'"></div><div class="form-group"><label class="form-label">תיאור</label><textarea class="form-textarea" id="matDesc">'+(mat?esc(mat.description):'')+'</textarea></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"><div class="form-group"><label class="form-label">מקצוע *</label><select class="form-select" id="matSubject">'+opts+'</select></div><div class="form-group"><label class="form-label">כיתה</label><select class="form-select" id="matGrade"><option value="">—</option>'+grades+'</select></div></div><div class="form-group"><label class="form-label">תגיות</label><input type="text" class="form-input" id="matTags" value="'+(mat?esc(mat.tags):'')+'"></div>'+(!mat?'<div class="form-group"><label class="form-label">קובץ *</label><div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById(\'fileInput\').click()"><div class="file-upload-icon"><i class="lucide-upload-cloud"></i></div><div class="file-upload-text">לחצו להעלאת קובץ</div><div class="file-upload-name" id="fileUploadName"></div></div><input type="file" id="fileInput" style="display:none" onchange="handleFileSelect(this)"></div>':'')+'<div class="modal-actions"><button class="btn btn-primary" onclick="'+(mat?"saveMaterialEdit('"+mat.id+"')":"saveMaterial()")+'" id="modalSaveBtn"><i class="lucide-save"></i> '+(mat?'שמירה':'הוספה')+'</button><button class="btn btn-ghost" onclick="closeModal()">ביטול</button></div>';selectedFile=null;openModal();}
+    function handleFileSelect(input){var f=input.files[0];if(!f)return;selectedFile=f;document.getElementById('fileUploadArea').classList.add('has-file');document.getElementById('fileUploadName').textContent=f.name;}
+    function readFileAsBase64(file){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result.split(',')[1]);};r.onerror=rej;r.readAsDataURL(file);});}
+    async function saveMaterial(){var t=document.getElementById('matTitle').value.trim();var s=document.getElementById('matSubject').value;if(!t||!s){toast('נא למלא כותרת ומקצוע','error');return;}var btn=document.getElementById('modalSaveBtn');btn.disabled=true;var d={title:t,description:document.getElementById('matDesc').value.trim(),subject:s,gradeLevel:document.getElementById('matGrade').value,tags:document.getElementById('matTags').value.trim()};var fb=null;if(selectedFile){fb={name:selectedFile.name,mimeType:selectedFile.type,data:await readFileAsBase64(selectedFile)};}try{var r=await apiPost('adminAddMaterial',{token:adminState.token,materialData:d,fileBlob:fb});if(r.success){toast('נוסף!','success');closeModal();selectedFile=null;loadAdminMaterials();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}btn.disabled=false;}
+    async function saveMaterialEdit(id){var btn=document.getElementById('modalSaveBtn');btn.disabled=true;try{var r=await apiPost('adminUpdateMaterial',{token:adminState.token,id:id,materialData:{title:document.getElementById('matTitle').value.trim(),description:document.getElementById('matDesc').value.trim(),subject:document.getElementById('matSubject').value,gradeLevel:document.getElementById('matGrade').value,tags:document.getElementById('matTags').value.trim()}});if(r.success){toast('עודכן!','success');closeModal();loadAdminMaterials();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}btn.disabled=false;}
+    async function deleteMaterial(id){if(!confirm('למחוק?'))return;try{var r=await apiPost('adminDeleteMaterial',{token:adminState.token,id:id});if(r.success){toast('נמחק!','success');loadAdminMaterials();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}}
+
+    /* ═══════ ADMIN SUBJECTS ═══════ */
+    async function loadAdminSubjects(){try{var r=await apiPost('adminGetSubjects',{token:adminState.token});if(r.error==='unauthorized'){doLogout();return;}adminState.subjects=r.data||[];var tb=document.getElementById('subjectsTableBody');if(!adminState.subjects.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">אין מקצועות</td></tr>';return;}tb.innerHTML=adminState.subjects.map(function(s){return '<tr><td style="font-size:1.2rem;">'+subjectIcon(s.name,s.icon)+'</td><td><strong>'+esc(s.name)+'</strong></td><td><span style="display:inline-block;width:18px;height:18px;border-radius:4px;background:'+s.color+';vertical-align:middle;"></span> '+s.color+'</td><td>'+s.order+'</td><td>'+(s.isActive!==false&&s.isActive!=='FALSE'?'<span class="badge badge-success">פעיל</span>':'<span class="badge badge-danger">מושבת</span>')+'</td><td class="actions"><button class="btn btn-ghost btn-sm" onclick="openSubjectModal(\''+s.id+'\')"><i class="lucide-pencil"></i></button><button class="btn btn-danger btn-sm" onclick="deleteSubject(\''+s.id+'\')"><i class="lucide-trash-2"></i></button></td></tr>';}).join('');}catch(e){}}
+    function openSubjectModal(editId){var subj=editId?adminState.subjects.find(function(s){return s.id===editId;}):null;document.getElementById('modalContent').innerHTML='<div class="modal-header"><div class="modal-title">'+(subj?'עריכת מקצוע':'הוספת מקצוע')+'</div><button class="modal-close" onclick="closeModal()"><i class="lucide-x"></i></button></div><div class="form-group"><label class="form-label">שם *</label><input type="text" class="form-input" id="subjName" value="'+(subj?esc(subj.name):'')+'"></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;"><div class="form-group"><label class="form-label">אייקון (Emoji)</label><input type="text" class="form-input" id="subjIcon" value="'+(subj?subj.icon:'📚')+'" style="text-align:center;font-size:1.2rem;"></div><div class="form-group"><label class="form-label">צבע</label><input type="color" class="form-input" id="subjColor" value="'+(subj?subj.color:'#0D9488')+'" style="height:42px;padding:3px;"></div><div class="form-group"><label class="form-label">סדר</label><input type="number" class="form-input" id="subjOrder" value="'+(subj?subj.order:'99')+'"></div></div><div class="modal-actions"><button class="btn btn-primary" onclick="'+(subj?"saveSubjectEdit('"+subj.id+"')":"saveSubject()")+'" id="modalSaveBtn"><i class="lucide-save"></i> '+(subj?'שמירה':'הוספה')+'</button><button class="btn btn-ghost" onclick="closeModal()">ביטול</button></div>';openModal();}
+    async function saveSubject(){var n=document.getElementById('subjName').value.trim();if(!n){toast('שם חסר','error');return;}var btn=document.getElementById('modalSaveBtn');btn.disabled=true;try{var r=await apiPost('adminAddSubject',{token:adminState.token,subjectData:{name:n,icon:document.getElementById('subjIcon').value,color:document.getElementById('subjColor').value,order:parseInt(document.getElementById('subjOrder').value)||99}});if(r.success){toast('נוסף!','success');closeModal();loadAdminSubjects();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}btn.disabled=false;}
+    async function saveSubjectEdit(id){var btn=document.getElementById('modalSaveBtn');btn.disabled=true;try{var r=await apiPost('adminUpdateSubject',{token:adminState.token,id:id,subjectData:{name:document.getElementById('subjName').value.trim(),icon:document.getElementById('subjIcon').value,color:document.getElementById('subjColor').value,order:parseInt(document.getElementById('subjOrder').value)||99}});if(r.success){toast('עודכן!','success');closeModal();loadAdminSubjects();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}btn.disabled=false;}
+    async function deleteSubject(id){if(!confirm('למחוק?'))return;try{var r=await apiPost('adminDeleteSubject',{token:adminState.token,id:id});if(r.success){toast('נמחק!','success');loadAdminSubjects();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}}
+
+    /* ═══════ ADMIN PAGES ═══════ */
+    async function loadAdminPages(){try{var r=await apiPost('adminGetPages',{token:adminState.token});if(r.error==='unauthorized'){doLogout();return;}adminState.pages=r.data||[];var tb=document.getElementById('pagesTableBody');if(!adminState.pages.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">אין דפים</td></tr>';return;}tb.innerHTML=adminState.pages.map(function(p){return '<tr><td><strong>'+esc(p.title)+'</strong></td><td style="font-family:monospace;font-size:0.78rem;color:var(--text-muted);">'+esc(p.slug)+'</td><td>'+(p.isActive!==false&&p.isActive!=='FALSE'?'<span class="badge badge-success">פעיל</span>':'<span class="badge badge-danger">מושבת</span>')+'</td><td style="font-size:0.78rem;">'+formatDate(p.updatedAt)+'</td><td class="actions"><button class="btn btn-ghost btn-sm" onclick="openPageModal(\''+p.id+'\')"><i class="lucide-pencil"></i></button><button class="btn btn-danger btn-sm" onclick="deletePage(\''+p.id+'\')"><i class="lucide-trash-2"></i></button></td></tr>';}).join('');}catch(e){}}
+    function openPageModal(editId){var pg=editId?adminState.pages.find(function(p){return p.id===editId;}):null;document.getElementById('modalContent').innerHTML='<div class="modal-header"><div class="modal-title">'+(pg?'עריכת דף':'הוספת דף')+'</div><button class="modal-close" onclick="closeModal()"><i class="lucide-x"></i></button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"><div class="form-group"><label class="form-label">כותרת *</label><input type="text" class="form-input" id="pgTitle" value="'+(pg?esc(pg.title):'')+'"></div><div class="form-group"><label class="form-label">Slug</label><input type="text" class="form-input" id="pgSlug" value="'+(pg?esc(pg.slug):'')+'" style="direction:ltr;"></div></div><div class="form-group"><label class="form-label">תוכן (HTML)</label><textarea class="form-textarea" id="pgContent" style="min-height:180px;">'+(pg?pg.content||'':'')+'</textarea></div><div class="modal-actions"><button class="btn btn-primary" onclick="'+(pg?"savePageEdit('"+pg.id+"')":"savePage()")+'" id="modalSaveBtn"><i class="lucide-save"></i> '+(pg?'שמירה':'הוספה')+'</button><button class="btn btn-ghost" onclick="closeModal()">ביטול</button></div>';openModal();}
+    async function savePage(){var t=document.getElementById('pgTitle').value.trim();if(!t){toast('כותרת חסרה','error');return;}var btn=document.getElementById('modalSaveBtn');btn.disabled=true;try{var r=await apiPost('adminAddPage',{token:adminState.token,pageData:{title:t,slug:document.getElementById('pgSlug').value.trim(),content:document.getElementById('pgContent').value}});if(r.success){toast('נוסף!','success');closeModal();loadAdminPages();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}btn.disabled=false;}
+    async function savePageEdit(id){var btn=document.getElementById('modalSaveBtn');btn.disabled=true;try{var r=await apiPost('adminUpdatePage',{token:adminState.token,id:id,pageData:{title:document.getElementById('pgTitle').value.trim(),slug:document.getElementById('pgSlug').value.trim(),content:document.getElementById('pgContent').value}});if(r.success){toast('עודכן!','success');closeModal();loadAdminPages();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}btn.disabled=false;}
+    async function deletePage(id){if(!confirm('למחוק?'))return;try{var r=await apiPost('adminDeletePage',{token:adminState.token,id:id});if(r.success){toast('נמחק!','success');loadAdminPages();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}}
+
+    /* ═══════ ADMIN SETTINGS ═══════ */
+    async function loadAdminSettings(){try{var r=await apiPost('adminGetSettings',{token:adminState.token});if(r.error==='unauthorized'){doLogout();return;}adminState.settings=r.data||{};document.getElementById('setSiteTitle').value=adminState.settings.siteTitle||'';document.getElementById('setHeroSubtitle').value=adminState.settings.heroSubtitle||'';document.getElementById('setFooterText').value=adminState.settings.footerText||'';}catch(e){}}
+    async function saveSettings(){try{var r=await apiPost('adminUpdateSettings',{token:adminState.token,settings:{siteTitle:document.getElementById('setSiteTitle').value.trim(),heroSubtitle:document.getElementById('setHeroSubtitle').value.trim(),footerText:document.getElementById('setFooterText').value.trim()}});if(r.success)toast('נשמר!','success');else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}}
+    async function changePassword(){var o=document.getElementById('setOldPassword').value;var n=document.getElementById('setNewPassword').value;if(!n){toast('סיסמה חסרה','error');return;}try{var r=await apiPost('adminChangePassword',{token:adminState.token,oldPassword:o,newPassword:n});if(r.success){toast('שונתה!','success');document.getElementById('setOldPassword').value='';document.getElementById('setNewPassword').value='';}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}}
+
+    /* ═══════ UTILS ═══════ */
+    function openModal(){document.getElementById('modalOverlay').classList.add('open');}
+    function closeModal(){document.getElementById('modalOverlay').classList.remove('open');selectedFile=null;}
+    function toast(m,t){var el=document.getElementById('toast');el.textContent=m;el.className='toast toast-'+(t||'success')+' show';setTimeout(function(){el.classList.remove('show');},3500);}
+    function esc(s){if(!s)return '';var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+    function getFileExtension(n){if(!n)return 'FILE';var p=n.split('.');if(p.length>1)return p.pop().toUpperCase();if(n.includes('presentation')||n.includes('pptx'))return 'PPTX';if(n.includes('document')||n.includes('docx'))return 'DOCX';if(n.includes('pdf'))return 'PDF';return 'FILE';}
+    function formatFileSize(b){if(!b||b===0)return '';var k=1024;var s=['B','KB','MB','GB'];var i=Math.floor(Math.log(b)/Math.log(k));return parseFloat((b/Math.pow(k,i)).toFixed(1))+' '+s[i];}
+    function formatDate(d){if(!d)return '—';try{return new Date(d).toLocaleDateString('he-IL');}catch(e){return '—';}}
+
+    init();
+  </script>
+</body>
+</html>
