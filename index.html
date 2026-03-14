@@ -366,7 +366,7 @@
       <div class="nav-links" id="navLinks">
         <button class="nav-link active" onclick="navigateTo('home')"><svg><use href="#i-home"/></svg> דף הבית</button>
         <div id="navSubjects" style="display:contents;"></div>
-        <button class="nav-link accent-link" onclick="showAdminLogin()"><svg><use href="#i-lock"/></svg> ניהול</button>
+        <button class="nav-link accent-link" onclick="openAdmin()"><svg><use href="#i-lock"/></svg> ניהול</button>
       </div>
       <div class="nav-actions">
         <div class="theme-switch" onclick="toggleTheme()" id="themeSwitch" role="button" aria-label="החלפת ערכת נושא">
@@ -403,78 +403,7 @@
     <footer class="footer"><p id="footerText">© 2026 מרכז החומרים הפדגוגיים. כל הזכויות שמורות.</p></footer>
   </div>
 
-  <!-- LOGIN -->
-  <div id="adminLoginScreen" class="login-overlay" style="display:none;">
-    <div class="login-box">
-      <div class="login-mark"><svg><use href="#i-shield"/></svg></div>
-      <div class="login-h">כניסה לניהול</div>
-      <div class="login-sub">הזינו את סיסמת המנהל</div>
-      <div id="loginNote" style="color:var(--accent);font-size:0.78rem;margin-bottom:12px;display:none;">כניסה ראשונה — הסיסמה שתזינו תהפוך לסיסמת המנהל</div>
-      <div class="fg"><input type="password" class="fi" id="loginPassword" placeholder="סיסמה" onkeypress="if(event.key==='Enter')doLogin()"></div>
-      <div id="loginError" class="ferr" style="text-align:center;margin-bottom:8px;font-size:0.82rem;word-break:break-word;max-height:120px;overflow-y:auto;"></div>
-      <button class="btn btn-primary btn-full" id="loginBtn" onclick="doLogin()"><svg><use href="#i-login"/></svg> התחברות</button>
-      <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="hideAdminLogin()"><svg><use href="#i-arrow-r"/></svg> חזרה</button>
-    </div>
   </div>
-
-  <!-- ADMIN -->
-  <div id="adminWrapper" class="admin-wrap"><div class="admin-lay">
-    <aside class="side">
-      <div class="side-logo"><div class="side-logo-mark"><svg><use href="#i-sliders"/></svg></div><span>ניהול</span></div>
-      <nav class="side-nav" id="adminNav">
-        <button class="side-item active" onclick="showSec('dashboard',this)"><svg><use href="#i-bar"/></svg> לוח בקרה</button>
-        <button class="side-item" onclick="showSec('materials',this)"><svg><use href="#i-file"/></svg> חומרים</button>
-        <button class="side-item" onclick="showSec('subjects',this)"><svg><use href="#i-layers"/></svg> מקצועות</button>
-        <button class="side-item" onclick="showSec('pages',this)"><svg><use href="#i-fp"/></svg> דפים</button>
-        <button class="side-item" onclick="showSec('settings',this)"><svg><use href="#i-sliders"/></svg> הגדרות</button>
-      </nav>
-      <div class="side-foot">
-        <button class="side-item" onclick="exitAdmin()"><svg><use href="#i-globe"/></svg> חזרה לאתר</button>
-        <button class="side-item" style="color:var(--danger);" onclick="doLogout()"><svg><use href="#i-logout"/></svg> התנתקות</button>
-      </div>
-    </aside>
-    <main class="admin-main">
-      <section id="adm-dashboard">
-        <div class="sec-h"><div><div class="sec-title">לוח בקרה</div><div class="sec-sub">סקירה כללית</div></div></div>
-        <div class="stats-g">
-          <div class="stat"><div class="stat-icon"><svg><use href="#i-file"/></svg></div><div class="stat-val" id="statMaterials">—</div><div class="stat-lbl">חומרים</div></div>
-          <div class="stat"><div class="stat-icon"><svg><use href="#i-layers"/></svg></div><div class="stat-val" id="statSubjects">—</div><div class="stat-lbl">מקצועות</div></div>
-          <div class="stat"><div class="stat-icon"><svg><use href="#i-fp"/></svg></div><div class="stat-val" id="statPages">—</div><div class="stat-lbl">דפים</div></div>
-          <div class="stat"><div class="stat-icon"><svg><use href="#i-download"/></svg></div><div class="stat-val" id="statDownloads">—</div><div class="stat-lbl">הורדות</div></div>
-        </div>
-        <div class="sec-h"><div class="sec-title" style="font-size:1rem;">אחרונים</div></div>
-        <div class="dt-wrap"><table class="dt"><thead><tr><th>כותרת</th><th>מקצוע</th><th>כיתה</th><th>תאריך</th></tr></thead><tbody id="recentBody"><tr><td colspan="4" style="text-align:center;color:var(--text-3);">טוען...</td></tr></tbody></table></div>
-      </section>
-      <section id="adm-materials" style="display:none;">
-        <div class="sec-h"><div><div class="sec-title">חומרים</div></div><button class="btn btn-primary" onclick="openMatModal()"><svg><use href="#i-plus"/></svg> הוספה</button></div>
-        <div class="dt-wrap"><table class="dt"><thead><tr><th>כותרת</th><th>מקצוע</th><th>כיתה</th><th>קובץ</th><th>הורדות</th><th>סטטוס</th><th>פעולות</th></tr></thead><tbody id="matBody"><tr><td colspan="7" style="text-align:center;color:var(--text-3);">טוען...</td></tr></tbody></table></div>
-      </section>
-      <section id="adm-subjects" style="display:none;">
-        <div class="sec-h"><div><div class="sec-title">מקצועות</div></div><button class="btn btn-primary" onclick="openSubjModal()"><svg><use href="#i-plus"/></svg> הוספה</button></div>
-        <div class="dt-wrap"><table class="dt"><thead><tr><th>אייקון</th><th>שם</th><th>צבע</th><th>סדר</th><th>סטטוס</th><th>פעולות</th></tr></thead><tbody id="subjBody"><tr><td colspan="6" style="text-align:center;color:var(--text-3);">טוען...</td></tr></tbody></table></div>
-      </section>
-      <section id="adm-pages" style="display:none;">
-        <div class="sec-h"><div><div class="sec-title">דפים</div></div><button class="btn btn-primary" onclick="openPgModal()"><svg><use href="#i-plus"/></svg> הוספה</button></div>
-        <div class="dt-wrap"><table class="dt"><thead><tr><th>כותרת</th><th>Slug</th><th>סטטוס</th><th>עודכן</th><th>פעולות</th></tr></thead><tbody id="pgBody"><tr><td colspan="5" style="text-align:center;color:var(--text-3);">טוען...</td></tr></tbody></table></div>
-      </section>
-      <section id="adm-settings" style="display:none;">
-        <div class="sec-h"><div><div class="sec-title">הגדרות</div></div></div>
-        <div style="background:var(--bg-card);backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:var(--r-md);padding:26px;max-width:580px;">
-          <div class="fg"><label class="fl">כותרת האתר</label><input type="text" class="fi" id="setSiteTitle"></div>
-          <div class="fg"><label class="fl">כותרת משנה</label><input type="text" class="fi" id="setHeroSubtitle"></div>
-          <div class="fg"><label class="fl">Footer</label><input type="text" class="fi" id="setFooterText"></div>
-          <hr style="border-color:var(--glass-border);margin:18px 0;">
-          <div class="sec-title" style="font-size:0.92rem;margin-bottom:12px;">שינוי סיסמה</div>
-          <div class="fg"><label class="fl">נוכחית</label><input type="password" class="fi" id="setOldPw"></div>
-          <div class="fg"><label class="fl">חדשה</label><input type="password" class="fi" id="setNewPw"></div>
-          <div style="display:flex;gap:8px;"><button class="btn btn-primary" onclick="saveSettings()"><svg><use href="#i-save"/></svg> שמירה</button><button class="btn btn-ghost" onclick="changePw()"><svg><use href="#i-key"/></svg> שינוי סיסמה</button></div>
-        </div>
-      </section>
-    </main>
-  </div></div>
-
-  <div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()"><div class="modal" id="modalContent"></div></div>
-  <div class="toast" id="toast"></div>
 
   <script src="api.js"></script>
   <script>
@@ -501,7 +430,6 @@
 
     /* ═══ STATE ═══ */
     var state={subjects:[],materials:[],settings:{},currentSubject:null,currentSearch:'',currentGrade:'',st:null};
-    var A={token:null,materials:[],subjects:[],pages:[],settings:{}};
 
     /* ═══ PUBLIC ═══ */
     async function init(){
@@ -535,56 +463,12 @@
     function toggleMobileMenu(){document.getElementById('navLinks').classList.toggle('open');}
     function closeMM(){document.getElementById('navLinks').classList.remove('open');}
 
-    /* ═══ ADMIN AUTH ═══ */
-    async function showAdminLogin(){closeMM();document.getElementById('adminLoginScreen').style.display='flex';document.getElementById('loginPassword').focus();try{var r=await apiGet('getSettings');document.getElementById('loginNote').style.display=(r.data&&r.data.adminPasswordHash)?'none':'block';}catch(e){}}
-    function hideAdminLogin(){document.getElementById('adminLoginScreen').style.display='none';document.getElementById('loginPassword').value='';}
-    async function doLogin(){var pw=document.getElementById('loginPassword').value;if(!pw)return;var b=document.getElementById('loginBtn');b.disabled=true;b.innerHTML='<svg style="animation:spin .8s linear infinite"><use href="#i-loader"/></svg> מתחבר...';try{var r=await apiPost('adminLogin',{password:pw});console.log('[login result]',JSON.stringify(r));if(r.success){A.token=r.token;document.getElementById('adminLoginScreen').style.display='none';document.getElementById('adminWrapper').classList.add('open');loadDash();}else{var el=document.getElementById('loginError');el.textContent=r.error||'שגיאה לא ידועה — בדקו Console (F12)';el.style.display='block';setTimeout(function(){el.style.display='none';},8e3);}}catch(e){console.error('[login error]',e);var el=document.getElementById('loginError');el.textContent='שגיאה: '+e.message;el.style.display='block';setTimeout(function(){el.style.display='none';},12e3);}b.disabled=false;b.innerHTML='<svg><use href="#i-login"/></svg> התחברות';}
-    function exitAdmin(){document.getElementById('adminWrapper').classList.remove('open');init();}
-    async function doLogout(){if(A.token)try{await apiPost('adminLogout',{token:A.token});}catch(e){}A.token=null;document.getElementById('adminWrapper').classList.remove('open');init();}
-
-    /* ═══ ADMIN NAV ═══ */
-    function showSec(n,b){document.querySelectorAll('[id^="adm-"]').forEach(function(el){el.style.display='none';});document.getElementById('adm-'+n).style.display='block';document.querySelectorAll('#adminNav .side-item').forEach(function(el){el.classList.remove('active');});if(b)b.classList.add('active');({dashboard:loadDash,materials:loadMat,subjects:loadSubj,pages:loadPg,settings:loadSet})[n]();}
-    async function loadDash(){try{var r=await apiPost('adminGetStats',{token:A.token});if(r.error==='unauthorized'){doLogout();return;}var d=r.data;document.getElementById('statMaterials').textContent=d.totalMaterials;document.getElementById('statSubjects').textContent=d.totalSubjects;document.getElementById('statPages').textContent=d.totalPages;document.getElementById('statDownloads').textContent=d.totalDownloads;document.getElementById('recentBody').innerHTML=(d.recentMaterials&&d.recentMaterials.length)?d.recentMaterials.map(function(m){return '<tr><td>'+esc(m.title)+'</td><td>'+esc(m.subject)+'</td><td>'+(m.gradeLevel||'—')+'</td><td>'+fd(m.createdAt)+'</td></tr>';}).join(''):'<tr><td colspan="4" style="text-align:center;color:var(--text-3);">אין</td></tr>';}catch(e){}}
-
-    /* ═══ ADMIN MATERIALS ═══ */
-    async function loadMat(){try{var s=await apiPost('adminGetSubjects',{token:A.token});A.subjects=s.data||[];var m=await apiPost('adminGetAllMaterials',{token:A.token});if(m.error==='unauthorized'){doLogout();return;}A.materials=m.data||[];var tb=document.getElementById('matBody');if(!A.materials.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text-3);">ריק</td></tr>';return;}tb.innerHTML=A.materials.map(function(m){return '<tr><td><strong>'+esc(m.title)+'</strong></td><td>'+esc(m.subject)+'</td><td>'+(m.gradeLevel||'—')+'</td><td style="font-size:.76rem;color:var(--text-3);">'+esc(m.fileName||'—')+'</td><td>'+(m.downloadCount||0)+'</td><td>'+(m.isActive!==false&&m.isActive!=='FALSE'?'<span class="badge badge-ok">פעיל</span>':'<span class="badge badge-no">מושבת</span>')+'</td><td class="acts"><button class="btn btn-ghost btn-sm" onclick="openMatModal(\''+m.id+'\')"><svg><use href="#i-edit"/></svg></button><button class="btn btn-danger btn-sm" onclick="delMat(\''+m.id+'\')"><svg><use href="#i-trash"/></svg></button></td></tr>';}).join('');}catch(e){}}
-    var selFile=null;
-    function openMatModal(eid){var mat=eid?A.materials.find(function(m){return m.id===eid;}):null;var opts=(A.subjects||[]).map(function(s){return '<option value="'+esc(s.name)+'" '+(mat&&mat.subject===s.name?'selected':'')+'>'+esc(s.name)+'</option>';}).join('');var gr=['א','ב','ג','ד','ה','ו','ז','ח'].map(function(g){return '<option value="'+g+'" '+(mat&&mat.gradeLevel===g?'selected':'')+'>'+g+'׳</option>';}).join('');document.getElementById('modalContent').innerHTML='<div class="modal-h"><div class="modal-t">'+(mat?'עריכת חומר':'חומר חדש')+'</div><button class="modal-x" onclick="closeModal()"><svg><use href="#i-x"/></svg></button></div><div class="fg"><label class="fl">כותרת *</label><input type="text" class="fi" id="mT" value="'+(mat?esc(mat.title):'')+'"></div><div class="fg"><label class="fl">תיאור</label><textarea class="fta" id="mD">'+(mat?esc(mat.description):'')+'</textarea></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"><div class="fg"><label class="fl">מקצוע *</label><select class="fsel" id="mS">'+opts+'</select></div><div class="fg"><label class="fl">כיתה</label><select class="fsel" id="mG"><option value="">—</option>'+gr+'</select></div></div><div class="fg"><label class="fl">תגיות</label><input type="text" class="fi" id="mTg" value="'+(mat?esc(mat.tags):'')+'"></div>'+(!mat?'<div class="fg"><label class="fl">קובץ *</label><div class="fu-area" id="fuArea" onclick="document.getElementById(\'fuIn\').click()"><div class="fu-icon"><svg><use href="#i-upload"/></svg></div><div class="fu-text">לחצו להעלאה</div><div class="fu-name" id="fuName"></div></div><input type="file" id="fuIn" style="display:none" onchange="fuSel(this)"></div>':'')+'<div class="modal-acts"><button class="btn btn-primary" onclick="'+(mat?"saveMatEdit('"+mat.id+"')":"saveMat()")+'" id="mBtn"><svg><use href="#i-save"/></svg> '+(mat?'שמירה':'הוספה')+'</button><button class="btn btn-ghost" onclick="closeModal()">ביטול</button></div>';selFile=null;openModal();}
-    function fuSel(inp){var f=inp.files[0];if(!f)return;selFile=f;document.getElementById('fuArea').classList.add('has');document.getElementById('fuName').textContent=f.name;}
-    function r64(f){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result.split(',')[1]);};r.onerror=rej;r.readAsDataURL(f);});}
-    async function saveMat(){var t=document.getElementById('mT').value.trim(),s=document.getElementById('mS').value;if(!t||!s){toast('נא למלא שדות חובה','error');return;}var b=document.getElementById('mBtn');b.disabled=true;var d={title:t,description:document.getElementById('mD').value.trim(),subject:s,gradeLevel:document.getElementById('mG').value,tags:document.getElementById('mTg').value.trim()};var fb=null;if(selFile)fb={name:selFile.name,mimeType:selFile.type,data:await r64(selFile)};try{var r=await apiPost('adminAddMaterial',{token:A.token,materialData:d,fileBlob:fb});if(r.success){toast('נוסף!','success');closeModal();selFile=null;loadMat();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}b.disabled=false;}
-    async function saveMatEdit(id){var b=document.getElementById('mBtn');b.disabled=true;try{var r=await apiPost('adminUpdateMaterial',{token:A.token,id:id,materialData:{title:document.getElementById('mT').value.trim(),description:document.getElementById('mD').value.trim(),subject:document.getElementById('mS').value,gradeLevel:document.getElementById('mG').value,tags:document.getElementById('mTg').value.trim()}});if(r.success){toast('עודכן!','success');closeModal();loadMat();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}b.disabled=false;}
-    async function delMat(id){if(!confirm('למחוק?'))return;try{var r=await apiPost('adminDeleteMaterial',{token:A.token,id:id});if(r.success){toast('נמחק!','success');loadMat();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}}
-
-    /* ═══ ADMIN SUBJECTS ═══ */
-    async function loadSubj(){try{var r=await apiPost('adminGetSubjects',{token:A.token});if(r.error==='unauthorized'){doLogout();return;}A.subjects=r.data||[];var tb=document.getElementById('subjBody');if(!A.subjects.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-3);">ריק</td></tr>';return;}tb.innerHTML=A.subjects.map(function(s){return '<tr><td>'+si(s.name)+'</td><td><strong>'+esc(s.name)+'</strong></td><td><span style="display:inline-block;width:16px;height:16px;border-radius:4px;background:'+s.color+';vertical-align:middle;"></span> '+s.color+'</td><td>'+s.order+'</td><td>'+(s.isActive!==false&&s.isActive!=='FALSE'?'<span class="badge badge-ok">פעיל</span>':'<span class="badge badge-no">מושבת</span>')+'</td><td class="acts"><button class="btn btn-ghost btn-sm" onclick="openSubjModal(\''+s.id+'\')"><svg><use href="#i-edit"/></svg></button><button class="btn btn-danger btn-sm" onclick="delSubj(\''+s.id+'\')"><svg><use href="#i-trash"/></svg></button></td></tr>';}).join('');}catch(e){}}
-    function openSubjModal(eid){var s=eid?A.subjects.find(function(x){return x.id===eid;}):null;document.getElementById('modalContent').innerHTML='<div class="modal-h"><div class="modal-t">'+(s?'עריכה':'מקצוע חדש')+'</div><button class="modal-x" onclick="closeModal()"><svg><use href="#i-x"/></svg></button></div><div class="fg"><label class="fl">שם *</label><input type="text" class="fi" id="sN" value="'+(s?esc(s.name):'')+'"></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;"><div class="fg"><label class="fl">אייקון</label><input type="text" class="fi" id="sI" value="'+(s?s.icon:'📚')+'" style="text-align:center;font-size:1.1rem;"></div><div class="fg"><label class="fl">צבע</label><input type="color" class="fi" id="sC" value="'+(s?s.color:'#06B6D4')+'" style="height:40px;padding:3px;"></div><div class="fg"><label class="fl">סדר</label><input type="number" class="fi" id="sO" value="'+(s?s.order:'99')+'"></div></div><div class="modal-acts"><button class="btn btn-primary" onclick="'+(s?"saveSubjEdit('"+s.id+"')":"saveSubj()")+'" id="mBtn"><svg><use href="#i-save"/></svg> '+(s?'שמירה':'הוספה')+'</button><button class="btn btn-ghost" onclick="closeModal()">ביטול</button></div>';openModal();}
-    async function saveSubj(){var n=document.getElementById('sN').value.trim();if(!n){toast('שם חסר','error');return;}var b=document.getElementById('mBtn');b.disabled=true;try{var r=await apiPost('adminAddSubject',{token:A.token,subjectData:{name:n,icon:document.getElementById('sI').value,color:document.getElementById('sC').value,order:parseInt(document.getElementById('sO').value)||99}});if(r.success){toast('נוסף!','success');closeModal();loadSubj();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}b.disabled=false;}
-    async function saveSubjEdit(id){var b=document.getElementById('mBtn');b.disabled=true;try{var r=await apiPost('adminUpdateSubject',{token:A.token,id:id,subjectData:{name:document.getElementById('sN').value.trim(),icon:document.getElementById('sI').value,color:document.getElementById('sC').value,order:parseInt(document.getElementById('sO').value)||99}});if(r.success){toast('עודכן!','success');closeModal();loadSubj();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}b.disabled=false;}
-    async function delSubj(id){if(!confirm('למחוק?'))return;try{var r=await apiPost('adminDeleteSubject',{token:A.token,id:id});if(r.success){toast('נמחק!','success');loadSubj();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}}
-
-    /* ═══ ADMIN PAGES ═══ */
-    async function loadPg(){try{var r=await apiPost('adminGetPages',{token:A.token});if(r.error==='unauthorized'){doLogout();return;}A.pages=r.data||[];var tb=document.getElementById('pgBody');if(!A.pages.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--text-3);">ריק</td></tr>';return;}tb.innerHTML=A.pages.map(function(p){return '<tr><td><strong>'+esc(p.title)+'</strong></td><td style="font-family:monospace;font-size:.76rem;color:var(--text-3);">'+esc(p.slug)+'</td><td>'+(p.isActive!==false&&p.isActive!=='FALSE'?'<span class="badge badge-ok">פעיל</span>':'<span class="badge badge-no">מושבת</span>')+'</td><td style="font-size:.76rem;">'+fd(p.updatedAt)+'</td><td class="acts"><button class="btn btn-ghost btn-sm" onclick="openPgModal(\''+p.id+'\')"><svg><use href="#i-edit"/></svg></button><button class="btn btn-danger btn-sm" onclick="delPg(\''+p.id+'\')"><svg><use href="#i-trash"/></svg></button></td></tr>';}).join('');}catch(e){}}
-    function openPgModal(eid){var p=eid?A.pages.find(function(x){return x.id===eid;}):null;document.getElementById('modalContent').innerHTML='<div class="modal-h"><div class="modal-t">'+(p?'עריכה':'דף חדש')+'</div><button class="modal-x" onclick="closeModal()"><svg><use href="#i-x"/></svg></button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"><div class="fg"><label class="fl">כותרת *</label><input type="text" class="fi" id="pT" value="'+(p?esc(p.title):'')+'"></div><div class="fg"><label class="fl">Slug</label><input type="text" class="fi" id="pS" value="'+(p?esc(p.slug):'')+'" style="direction:ltr;"></div></div><div class="fg"><label class="fl">תוכן (HTML)</label><textarea class="fta" id="pC" style="min-height:160px;">'+(p?p.content||'':'')+'</textarea></div><div class="modal-acts"><button class="btn btn-primary" onclick="'+(p?"savePgEdit('"+p.id+"')":"savePg()")+'" id="mBtn"><svg><use href="#i-save"/></svg> '+(p?'שמירה':'הוספה')+'</button><button class="btn btn-ghost" onclick="closeModal()">ביטול</button></div>';openModal();}
-    async function savePg(){var t=document.getElementById('pT').value.trim();if(!t){toast('כותרת חסרה','error');return;}var b=document.getElementById('mBtn');b.disabled=true;try{var r=await apiPost('adminAddPage',{token:A.token,pageData:{title:t,slug:document.getElementById('pS').value.trim(),content:document.getElementById('pC').value}});if(r.success){toast('נוסף!','success');closeModal();loadPg();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}b.disabled=false;}
-    async function savePgEdit(id){var b=document.getElementById('mBtn');b.disabled=true;try{var r=await apiPost('adminUpdatePage',{token:A.token,id:id,pageData:{title:document.getElementById('pT').value.trim(),slug:document.getElementById('pS').value.trim(),content:document.getElementById('pC').value}});if(r.success){toast('עודכן!','success');closeModal();loadPg();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}b.disabled=false;}
-    async function delPg(id){if(!confirm('למחוק?'))return;try{var r=await apiPost('adminDeletePage',{token:A.token,id:id});if(r.success){toast('נמחק!','success');loadPg();}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}}
-
-    /* ═══ SETTINGS ═══ */
-    async function loadSet(){try{var r=await apiPost('adminGetSettings',{token:A.token});if(r.error==='unauthorized'){doLogout();return;}A.settings=r.data||{};document.getElementById('setSiteTitle').value=A.settings.siteTitle||'';document.getElementById('setHeroSubtitle').value=A.settings.heroSubtitle||'';document.getElementById('setFooterText').value=A.settings.footerText||'';}catch(e){}}
-    async function saveSettings(){try{var r=await apiPost('adminUpdateSettings',{token:A.token,settings:{siteTitle:document.getElementById('setSiteTitle').value.trim(),heroSubtitle:document.getElementById('setHeroSubtitle').value.trim(),footerText:document.getElementById('setFooterText').value.trim()}});if(r.success)toast('נשמר!','success');else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}}
-    async function changePw(){var o=document.getElementById('setOldPw').value,n=document.getElementById('setNewPw').value;if(!n){toast('סיסמה חסרה','error');return;}try{var r=await apiPost('adminChangePassword',{token:A.token,oldPassword:o,newPassword:n});if(r.success){toast('שונתה!','success');document.getElementById('setOldPw').value='';document.getElementById('setNewPw').value='';}else toast(r.error||'שגיאה','error');}catch(e){toast('שגיאה','error');}}
-
     /* ═══ UTILS ═══ */
-    function openModal(){document.getElementById('modalBg').classList.add('open');}
-    function closeModal(){document.getElementById('modalBg').classList.remove('open');selFile=null;}
-    function toast(m,t){var el=document.getElementById('toast');el.textContent=m;el.className='toast toast-'+(t||'success')+' show';setTimeout(function(){el.classList.remove('show');},3500);}
     function esc(s){if(!s)return '';var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
     function gfe(n){if(!n)return 'FILE';var p=n.split('.');if(p.length>1)return p.pop().toUpperCase();return 'FILE';}
     function ffs(b){if(!b||b===0)return '';var k=1024,s=['B','KB','MB','GB'],i=Math.floor(Math.log(b)/Math.log(k));return parseFloat((b/Math.pow(k,i)).toFixed(1))+' '+s[i];}
     function fd(d){if(!d)return '—';try{return new Date(d).toLocaleDateString('he-IL');}catch(e){return '—';}}
 
-    /* spinner keyframe */
     var st=document.createElement('style');st.textContent='@keyframes spin{to{transform:rotate(360deg)}}';document.head.appendChild(st);
 
     init();
