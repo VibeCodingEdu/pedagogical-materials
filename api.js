@@ -3,7 +3,7 @@
  *  API — JSONP (zero CORS issues)
  * ═══════════════════════════════════════════
  */
-const API_URL = 'https://script.google.com/macros/s/AKfycbwDUcOzwL7OYdHH31_h-mnyg6glXK_NixcnREZS5HeUPjPzPKx6efxYW8KbB8SSRePZ/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzvelQBmUAN9tnMjb0_AbqNRG0KV5RKIotM6S-PNT9MlnJh6EfFsM_j7kUo_KKf4x7l/exec';
 
 const ADMIN_URL = API_URL + (API_URL.includes('?') ? '&' : '?') + 'page=admin';
 
