@@ -198,7 +198,7 @@
     function closeMM(){document.getElementById('navLinks').classList.remove('open')}
 
     /* ניהול — opens login.html (same GitHub Pages site) */
-    function openAdmin(){ window.open('login.html','_blank') }
+    function openAdmin(){ window.open(ADMIN_URL,'_blank') }
 
     function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML}
     function gfe(n){if(!n)return'FILE';var p=n.split('.');return p.length>1?p.pop().toUpperCase():'FILE'}
